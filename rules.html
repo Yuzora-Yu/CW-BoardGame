@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>説明書 — 最強のケースワーカーは誰だ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+JP:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0d0d0d;color:#ddd;font-family:'Noto Serif JP',serif;padding:0 0 60px;}
+/* ── ヘッダー ── */
+.hdr{
+  position:sticky;top:0;z-index:10;
+  background:rgba(13,13,13,.95);backdrop-filter:blur(8px);
+  padding:12px 16px;display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid #222;
+}
+.back-btn{
+  background:#1a1a1a;border:1px solid #333;color:#888;
+  padding:6px 14px;border-radius:8px;cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif;font-size:.8rem;
+}
+.hdr-title{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.15em;color:#aaa;}
+/* ── コンテンツ ── */
+.content{max-width:600px;margin:0 auto;padding:24px 16px;}
+h1{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.1em;color:#e0e0e0;margin-bottom:4px;}
+h2{font-size:.95rem;font-weight:700;font-family:'Noto Sans JP',sans-serif;color:#66bb6a;margin:28px 0 10px;padding-left:8px;border-left:3px solid #2d6a2d;}
+h3{font-size:.82rem;font-weight:700;font-family:'Noto Sans JP',sans-serif;color:#90caf9;margin:16px 0 6px;}
+p{font-size:.82rem;line-height:1.8;color:#ccc;margin-bottom:8px;}
+ul{padding-left:20px;margin-bottom:8px;}
+li{font-size:.82rem;line-height:1.8;color:#ccc;margin-bottom:2px;}
+.divider{height:1px;background:linear-gradient(90deg,transparent,#333,transparent);margin:20px 0;}
+/* ── フローボックス ── */
+.flow{background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:16px;margin:10px 0;}
+.flow-step{
+  display:flex;align-items:flex-start;gap:10px;padding:6px 0;
+  border-bottom:1px solid #1a1a1a;font-size:.8rem;color:#bbb;
+}
+.flow-step:last-child{border-bottom:none;}
+.flow-num{
+  min-width:22px;height:22px;border-radius:50%;
+  background:#1a2a1a;border:1px solid #3a6b3a;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.65rem;font-weight:700;color:#66bb6a;flex-shrink:0;
+  font-family:'Noto Sans JP',sans-serif;
+}
+/* ── 表 ── */
+table{width:100%;border-collapse:collapse;font-size:.78rem;margin:8px 0 12px;}
+th{background:#111;color:#888;padding:7px 10px;text-align:left;border-bottom:1px solid #222;}
+td{padding:7px 10px;border-bottom:1px solid #1a1a1a;color:#ccc;vertical-align:top;}
+tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+/* ── 注意ボックス ── */
+.warn-box{background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.25);border-radius:8px;padding:12px;margin:10px 0;font-size:.8rem;color:#ffe082;line-height:1.7;}
+.info-box{background:rgba(33,150,243,.07);border:1px solid rgba(33,150,243,.2);border-radius:8px;padding:12px;margin:10px 0;font-size:.8rem;color:#90caf9;line-height:1.7;}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <button class="back-btn" onclick="history.back()">← 戻る</button>
+  <span class="hdr-title">説明書</span>
+</div>
+
+<div class="content">
+<h1>最強のケースワーカーは誰だ</h1>
+<p style="font-size:.78rem;color:#555;margin-top:4px;">生活保護ケースワーカー体験ボードゲーム — クイックガイド</p>
+
+<div class="divider"></div>
+
+<h2>🎯 ゲームの目的</h2>
+<p>あなたは生活保護担当のケースワーカー。複数の担当ケースを抱えながら、ケースの<strong style="color:#ffe082;">自立</strong>を支援して<strong style="color:#ffe082;">5ポイント</strong>を先取したプレイヤーが勝利です。</p>
+
+<div class="info-box">
+  💡 普段からケースのメンタルと所持金を管理し、不正フラグを溜めないことが重要。<br>
+  支援手段が足りないときは隣のワーカーとのカード交換を活用しましょう。
+</div>
+
+<h2>📦 初期設定</h2>
+<table>
+  <tr><th>ステータス</th><th>初期値</th></tr>
+  <tr><td>💰 所持金</td><td>2コイン</td></tr>
+  <tr><td>🧠 メンタル</td><td>5</td></tr>
+  <tr><td>🃏 手札</td><td>5枚（上限7枚）</td></tr>
+  <tr><td>📋 担当ケース</td><td>2枚</td></tr>
+</table>
+
+<h2>🔄 ターンの流れ</h2>
+<h3>1ターン目（特別）</h3>
+<p>回復なし・トラブルなし・ケース追加なし。そのままアクションフェーズへ。</p>
+
+<h3>2ターン目以降</h3>
+<div class="flow">
+  <div class="flow-step"><div class="flow-num">1</div><div>💰+3 / 🧠+1 で回復（病気中は💰+1 / 🧠+0）</div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div>ケースのターン変動処理（毎T欄の数値を自動適用）</div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div>トラブルカード1枚発動</div></div>
+  <div class="flow-step"><div class="flow-num">4</div><div>ケース追加（通常：奇数ターンのみ / ハード：毎ターン）</div></div>
+  <div class="flow-step"><div class="flow-num">5</div><div>アクションフェーズ（1枚ドロー → 行動）</div></div>
+  <div class="flow-step"><div class="flow-num">6</div><div>ターンエンド処理（①〜⑦）</div></div>
+</div>
+
+<h2>⚡ アクションフェーズ</h2>
+<p><strong style="color:#a5d6a7;">行動回数 = 担当ケース数 − 1</strong></p>
+<table>
+  <tr><th>行動</th><th>内容</th></tr>
+  <tr><td>A カードを使う</td><td>担当ケースまたは自分/他ワーカーに使用</td></tr>
+  <tr><td>C 交換</td><td>隣のワーカーと1枚ずつ交換（合意必要・行動1消費）</td></tr>
+  <tr><td>D 追加ドロー</td><td>💰-1 ＋ 行動1消費でワーカー山札から1枚引く</td></tr>
+</table>
+<ul>
+  <li>💰が足りない場合、コストのかかる行動・カードは使用不可</li>
+  <li>手札は7枚上限。超えたら自分で選んで捨てる</li>
+</ul>
+
+<h2>📋 ターンエンド処理（順番厳守）</h2>
+<div class="flow">
+  <div class="flow-step"><div class="flow-num">①</div><div>不正フラグ加算：各ケースが条件を満たせば不正フラグ+1（AND条件）</div></div>
+  <div class="flow-step"><div class="flow-num">②</div><div>不正フラグ分だけCWの💰を減算</div></div>
+  <div class="flow-step"><div class="flow-num">③</div><div>怒りフラグ3累積のケース → 対応困難ケース（ID1019）に変化</div></div>
+  <div class="flow-step"><div class="flow-num">④</div><div>💰5到達・自立フラグ付きケース → 自立廃止・ポイント取得</div></div>
+  <div class="flow-step"><div class="flow-num">⑤</div><div>監査判定：監査フラグ保持中に不正ケースが残っていれば → ゲームオーバー</div></div>
+  <div class="flow-step"><div class="flow-num">⑥</div><div>🧠0のケース → 精神ケース（ID1004）に変化</div></div>
+  <div class="flow-step"><div class="flow-num">⑦</div><div>ルーレット（5パターン均等20%）</div></div>
+</div>
+
+<h2>⭐ ポイントと勝利条件</h2>
+<table>
+  <tr><th>イベント</th><th>ポイント</th></tr>
+  <tr><td>ケース自立（💰5到達・自立フラグ）</td><td>+1pt</td></tr>
+  <tr><td>困難ケース（ID1019）の自立</td><td>+2pt</td></tr>
+  <tr><td>ケースの死亡</td><td>-1pt ＋ CW🧠-1</td></tr>
+  <tr><td>ケースの失踪</td><td>CW💰-1（ポイント変動なし）</td></tr>
+</table>
+<p><strong style="color:#ffe082;">5ポイント先取で勝利！</strong>（エンドレスモードはゲームオーバーまで継続）</p>
+
+<h2>🃏 ケース種別と特性</h2>
+<table>
+  <tr><th>種別</th><th>特性</th></tr>
+  <tr><td style="color:#81c784;">通常</td><td>安定。🧠0で精神ケースに変化</td></tr>
+  <tr><td style="color:#ce93d8;">精神</td><td>メンタル悪化・怒りフラグ蓄積</td></tr>
+  <tr><td style="color:#ffe082;">困窮</td><td>💰不足で死亡・失踪リスク</td></tr>
+  <tr><td style="color:#ef9a9a;">暴力</td><td>担当CWに毎ターンダメージ</td></tr>
+  <tr><td style="color:#ff8a65;">困難</td><td>毎ターンCWの💰-2・🧠-2。専用カードでのみ自立可（+2pt）</td></tr>
+</table>
+
+<h2>🔄 種別変化チャート</h2>
+<table>
+  <tr><th>条件</th><th>変化</th></tr>
+  <tr><td>管理マーカー累計2（困窮）</td><td>→ 通常（ID1001）💰+1ボーナス</td></tr>
+  <tr><td>通院マーカー累計2（精神）</td><td>→ 通常（ID1001）🧠+2ボーナス</td></tr>
+  <tr><td>面談マーカー累計2（暴力）</td><td>→ 通常（ID1001）🧠+1ボーナス</td></tr>
+  <tr><td>🧠0（ターンエンド⑥）</td><td>→ 精神（ID1004）</td></tr>
+  <tr><td>怒りフラグ3（ターンエンド③）</td><td>→ 困難（ID1019）</td></tr>
+</table>
+
+<h2>🎲 ルーレット（均等20%）</h2>
+<table>
+  <tr><th>出目</th><th>効果</th></tr>
+  <tr><td>① 何もなし</td><td>—</td></tr>
+  <tr><td>② 困窮判定</td><td>💰=0 → 死亡、🧠=0 → 失踪</td></tr>
+  <tr><td>③ 精神判定</td><td>💰=0 → 失踪、🧠=0 → 怒り+1</td></tr>
+  <tr><td>④ 暴力判定</td><td>💰=0 or 🧠=0 → 怒り+1</td></tr>
+  <tr><td>⑤ トラブル追加</td><td>もう1枚トラブル即発動</td></tr>
+</table>
+
+<h2>⚖️ 監査（指導検査）</h2>
+<div class="warn-box">
+  不正ケースを担当しているとトラブルカード「指導検査」が発動。<br>
+  CWの🧠-2（最低1止まり）＋監査フラグ付与。<br>
+  <strong>翌ターンエンド⑤で不正ケースが残っていれば → 強制ゲームオーバー！</strong>
+</div>
+
+<h2>🦠 病気システム</h2>
+<p>担当ケースの病気フラグ合計が<strong style="color:#aed581;">2以上</strong>になると担当CWが<strong style="color:#aed581;">病気状態</strong>に。</p>
+<p>病気中のターン開始回復は <strong>💰+1 / 🧠+0</strong>（通常は💰+3 / 🧠+1）</p>
+
+<h2>🔚 ゲーム終了条件</h2>
+<ul>
+  <li><strong style="color:#ffe082;">勝利：</strong>5ポイント先取（トレーニングモード）</li>
+  <li><strong style="color:#ef9a9a;">敗北：</strong>CWのメンタルが0（メンタル崩壊）</li>
+  <li><strong style="color:#ef9a9a;">敗北：</strong>監査フラグ中に翌ターンエンドで不正ケース残存</li>
+  <li><strong style="color:#90caf9;">例外終了：</strong>ワーカー山札切れ（エンドレスでは山札切れがゲームオーバー扱い）</li>
+</ul>
+
+<div class="divider"></div>
+<p style="text-align:center;font-size:.7rem;color:#444;margin-top:8px;">詳細ルールは別途配布の完全版説明書を参照ください。</p>
+
+</div>
+</body>
+</html>

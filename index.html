@@ -1,1 +1,293 @@
-test
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0d0d0d">
+<title>最強のケースワーカーは誰だ</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:#0d0d0d;
+  background-image:radial-gradient(ellipse at 20% 30%,#0d1f0d 0%,transparent 55%),
+                   radial-gradient(ellipse at 80% 70%,#1a0d0d 0%,transparent 55%);
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'Noto Sans JP',sans-serif;color:#fff;padding:20px;
+  user-select:none;
+}
+/* ─── タイトル ─── */
+.title-wrap{text-align:center;margin-bottom:40px;}
+.title-main{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(1.8rem,7vw,3rem);
+  letter-spacing:.12em;color:#e0e0e0;line-height:1.1;
+  text-shadow:0 0 40px rgba(76,175,80,0.3);
+}
+.title-sub{font-size:.75rem;color:#555;letter-spacing:.2em;margin-top:6px;}
+.title-deco{
+  width:60px;height:2px;
+  background:linear-gradient(90deg,transparent,#4caf50,transparent);
+  margin:12px auto;
+}
+/* ─── ボタン ─── */
+.menu-grid{width:100%;max-width:360px;display:flex;flex-direction:column;gap:10px;}
+.menu-btn{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 20px;border-radius:12px;border:none;cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif;font-weight:700;
+  font-size:.9rem;letter-spacing:.05em;text-align:left;
+  transition:transform .15s,box-shadow .15s;position:relative;
+  width:100%;
+}
+.menu-btn:hover{transform:translateY(-2px);}
+.menu-btn:active{transform:scale(.97);}
+.menu-btn .icon{font-size:1.3rem;flex-shrink:0;}
+.menu-btn .label{flex:1;}
+.menu-btn .arrow{opacity:.35;font-size:.8rem;}
+
+.btn-solo{background:linear-gradient(135deg,#1e3d1e,#0f2f0f);border:2px solid #3a6b3a;color:#a5d6a7;box-shadow:0 4px 20px rgba(45,106,45,0.3);}
+.btn-versus{background:linear-gradient(135deg,#1a1a2e,#0f0f1f);border:2px solid #3a3a6b;color:#9fa8da;box-shadow:0 4px 20px rgba(45,45,106,0.3);}
+.btn-coop{background:linear-gradient(135deg,#2e2018,#1f150f);border:2px solid #6b5a3a;color:#d4c49a;box-shadow:0 4px 20px rgba(106,90,45,0.3);}
+.btn-rank{background:linear-gradient(135deg,#2e2000,#1f1500);border:2px solid #6b5500;color:#ffe082;box-shadow:0 4px 20px rgba(106,85,0,0.3);}
+.btn-rules{background:linear-gradient(135deg,#1a1a1a,#111);border:2px solid #444;color:#ccc;box-shadow:0 4px 16px rgba(0,0,0,0.4);}
+.btn-cards{background:linear-gradient(135deg,#1a1a1a,#111);border:2px solid #444;color:#ccc;box-shadow:0 4px 16px rgba(0,0,0,0.4);}
+.btn-option{background:linear-gradient(135deg,#1a1a1a,#111);border:2px solid #444;color:#ccc;box-shadow:0 4px 16px rgba(0,0,0,0.4);}
+
+/* ─── バージョン ─── */
+.version{margin-top:24px;font-size:.62rem;color:#333;letter-spacing:.1em;}
+
+/* ─── トースト ─── */
+.toast{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);
+  background:#1a1a1a;border:1px solid #555;border-radius:14px;
+  padding:24px 32px;text-align:center;font-size:.9rem;
+  max-width:280px;width:90%;z-index:100;
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
+}
+.toast.show{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:auto;}
+.toast-title{font-size:1.1rem;font-weight:700;margin-bottom:10px;color:#e0e0e0;}
+.toast-body{color:#888;font-size:.82rem;margin-bottom:18px;line-height:1.6;}
+.toast-close{
+  background:#2a2a2a;color:#aaa;border:1px solid #444;
+  padding:8px 24px;border-radius:8px;font-family:'Noto Sans JP',sans-serif;
+  font-weight:700;cursor:pointer;font-size:.85rem;
+}
+
+/* ─── オプション画面 ─── */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.9);
+  display:none;align-items:center;justify-content:center;
+  z-index:200;padding:20px;
+}
+.overlay.show{display:flex;}
+.panel{
+  background:#111;border:1px solid #333;border-radius:16px;
+  padding:28px 24px;max-width:360px;width:100%;
+  max-height:90vh;overflow-y:auto;
+}
+.panel-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.15em;color:#ccc;margin-bottom:20px;text-align:center;}
+.panel-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #222;font-size:.82rem;}
+.panel-row:last-child{border-bottom:none;}
+.panel-label{color:#777;}
+.panel-val{color:#e0e0e0;font-weight:700;}
+.panel-btn{
+  width:100%;margin-top:12px;padding:12px;border-radius:10px;border:none;
+  font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.85rem;
+  cursor:pointer;transition:opacity .15s;
+}
+.panel-btn:hover{opacity:.82;}
+.pbtn-install{background:linear-gradient(135deg,#1565c0,#0d47a1);color:#90caf9;}
+.pbtn-update{background:linear-gradient(135deg,#1a3d1a,#0d2a0d);color:#a5d6a7;margin-top:8px;}
+.pbtn-close{background:#222;color:#666;border:1px solid #333;margin-top:16px;}
+
+/* ─── ランキング ─── */
+.rank-tabs{display:flex;gap:8px;margin-bottom:16px;}
+.rank-tab{
+  flex:1;padding:8px;border-radius:8px;border:2px solid #333;
+  background:transparent;color:#666;font-size:.8rem;cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif;font-weight:700;
+  transition:all .15s;
+}
+.rank-tab.active{border-color:#d4a017;color:#ffe082;background:rgba(212,160,23,.08);}
+.rank-table{width:100%;border-collapse:collapse;font-size:.78rem;}
+.rank-table th{color:#666;padding:6px 8px;text-align:left;border-bottom:1px solid #222;}
+.rank-table td{color:#ccc;padding:6px 8px;border-bottom:1px solid #1a1a1a;}
+.rank-table tr:first-child td{color:#ffd54f;font-weight:700;}
+.rank-empty{text-align:center;color:#444;padding:24px;font-size:.8rem;}
+</style>
+</head>
+<body>
+
+<div class="title-wrap">
+  <div class="title-main">最強のケースワーカーは誰だ</div>
+  <div class="title-deco"></div>
+  <div class="title-sub">生活保護ケースワーカー体験ボードゲーム</div>
+</div>
+
+<div class="menu-grid">
+  <button class="menu-btn btn-solo" onclick="location.href='game.html'">
+    <span class="icon">👤</span>
+    <span class="label">1人モード</span>
+    <span class="arrow">▶</span>
+  </button>
+  <button class="menu-btn btn-versus" onclick="showToast('対戦モード','2〜8人対戦モードは近日実装予定です！')">
+    <span class="icon">⚔️</span>
+    <span class="label">2〜8人 対戦モード</span>
+    <span class="arrow">▶</span>
+  </button>
+  <button class="menu-btn btn-coop" onclick="showToast('協力モード','2〜8人協力モードは近日実装予定です！')">
+    <span class="icon">🤝</span>
+    <span class="label">2〜8人 協力モード</span>
+    <span class="arrow">▶</span>
+  </button>
+  <button class="menu-btn btn-rank" onclick="openRanking()">
+    <span class="icon">🏆</span>
+    <span class="label">ランキング</span>
+    <span class="arrow">▶</span>
+  </button>
+  <button class="menu-btn btn-rules" onclick="location.href='rules.html'">
+    <span class="icon">📖</span>
+    <span class="label">説明書</span>
+    <span class="arrow">▶</span>
+  </button>
+  <button class="menu-btn btn-cards" onclick="location.href='sample.html'">
+    <span class="icon">🃏</span>
+    <span class="label">カード確認</span>
+    <span class="arrow">▶</span>
+  </button>
+  <button class="menu-btn btn-option" onclick="openOption()">
+    <span class="icon">⚙️</span>
+    <span class="label">オプション</span>
+    <span class="arrow">▶</span>
+  </button>
+</div>
+
+<div class="version">v1.0.0 — Solo Edition</div>
+
+<!-- トースト -->
+<div class="toast" id="toast">
+  <div class="toast-title" id="toast-title"></div>
+  <div class="toast-body" id="toast-body"></div>
+  <button class="toast-close" onclick="hideToast()">閉じる</button>
+</div>
+
+<!-- オプション -->
+<div class="overlay" id="option-overlay">
+  <div class="panel">
+    <div class="panel-title">⚙ OPTION</div>
+    <div id="option-content"></div>
+    <button class="panel-btn pbtn-install" id="installBtn" style="display:none" onclick="installPWA()">
+      📱 アプリとしてインストール
+    </button>
+    <button class="panel-btn pbtn-update" onclick="updateApp()">
+      🔄 アプリを更新する
+    </button>
+    <button class="panel-btn pbtn-close" onclick="closeOverlay('option-overlay')">閉じる</button>
+  </div>
+</div>
+
+<!-- ランキング -->
+<div class="overlay" id="rank-overlay">
+  <div class="panel">
+    <div class="panel-title">🏆 RANKING</div>
+    <div class="rank-tabs">
+      <button class="rank-tab active" id="tab-normal" onclick="switchTab('normal')">エンドレス<br>ノーマル</button>
+      <button class="rank-tab" id="tab-hard" onclick="switchTab('hard')">エンドレス<br>ハード</button>
+    </div>
+    <div id="rank-content"></div>
+    <button class="panel-btn pbtn-close" onclick="closeOverlay('rank-overlay')">閉じる</button>
+  </div>
+</div>
+
+<script>
+// ── PWA ──
+let deferredPrompt = null;
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBtn').style.display = 'block';
+});
+function installPWA() {
+  if (!deferredPrompt) { showToast('インストール','ブラウザのアドレスバー右端にあるインストールアイコンからインストールしてください。'); return; }
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(() => { deferredPrompt = null; document.getElementById('installBtn').style.display = 'none'; });
+}
+async function updateApp() {
+  if ('serviceWorker' in navigator) {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    for (const r of regs) await r.unregister();
+  }
+  const cacheKeys = await caches.keys();
+  for (const k of cacheKeys) await caches.delete(k);
+  showToast('更新完了','キャッシュを削除しました。再読み込みします。');
+  setTimeout(() => location.reload(true), 1200);
+}
+
+// ── ストレージ ──
+function getSave() { try { return JSON.parse(localStorage.getItem('cw_save')||'{}'); } catch { return {}; } }
+function setSave(data) { localStorage.setItem('cw_save', JSON.stringify(data)); }
+
+// ── トースト ──
+function showToast(title, body) {
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-body').textContent = body;
+  document.getElementById('toast').classList.add('show');
+}
+function hideToast() { document.getElementById('toast').classList.remove('show'); }
+
+// ── オプション ──
+function openOption() {
+  const save = getSave();
+  const first = save.firstPlay ? new Date(save.firstPlay).toLocaleString('ja-JP') : '未プレイ';
+  const counts = save.playCounts || {};
+  document.getElementById('option-content').innerHTML = `
+    <div class="panel-row"><span class="panel-label">初回プレイ日時</span><span class="panel-val">${first}</span></div>
+    <div class="panel-row"><span class="panel-label">トレーニング (ノーマル)</span><span class="panel-val">${counts.training_normal||0} 回</span></div>
+    <div class="panel-row"><span class="panel-label">トレーニング (ハード)</span><span class="panel-val">${counts.training_hard||0} 回</span></div>
+    <div class="panel-row"><span class="panel-label">エンドレス (ノーマル)</span><span class="panel-val">${counts.endless_normal||0} 回</span></div>
+    <div class="panel-row"><span class="panel-label">エンドレス (ハード)</span><span class="panel-val">${counts.endless_hard||0} 回</span></div>
+  `;
+  document.getElementById('option-overlay').classList.add('show');
+}
+
+// ── ランキング ──
+let currentTab = 'normal';
+function openRanking() {
+  currentTab = 'normal';
+  document.getElementById('tab-normal').classList.add('active');
+  document.getElementById('tab-hard').classList.remove('active');
+  renderRankTable('normal');
+  document.getElementById('rank-overlay').classList.add('show');
+}
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-normal').classList.toggle('active', tab==='normal');
+  document.getElementById('tab-hard').classList.toggle('active', tab==='hard');
+  renderRankTable(tab);
+}
+function renderRankTable(tab) {
+  const save = getSave();
+  const key = `rank_${tab}`;
+  const records = (save[key]||[]).slice(0,10);
+  const el = document.getElementById('rank-content');
+  if (!records.length) { el.innerHTML = '<div class="rank-empty">記録がありません</div>'; return; }
+  el.innerHTML = `<table class="rank-table">
+    <tr><th>#</th><th>PT</th><th>ターン</th><th>日時</th></tr>
+    ${records.map((r,i)=>`<tr><td>${i+1}</td><td>${r.points}pt</td><td>${r.turns}T</td><td>${new Date(r.date).toLocaleDateString('ja-JP')}</td></tr>`).join('')}
+  </table>`;
+}
+function closeOverlay(id) { document.getElementById(id).classList.remove('show'); }
+
+// 初回訪問記録
+(function(){
+  const save = getSave();
+  if (!save.firstPlay) { save.firstPlay = Date.now(); setSave(save); }
+})();
+</script>
+</body>
+</html>

@@ -4,304 +4,374 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ゲーム — 最強のケースワーカーは誰だ</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Noto+Serif+JP:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <script src="workerCards.js"></script>
 <script src="caseCards.js"></script>
 <script src="troubleCards.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
+/* ════════════════════════════════════════
+   RESET / BASE
+════════════════════════════════════════ */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
-  --green:#2d6a2d;--green-l:#a5d6a7;--green-b:#3a6b3a;
-  --red:#8b1a1a;--red-l:#ef9a9a;--red-b:#6b3a3a;
-  --black:#1a1a1a;--yellow:#ffe082;--purple:#ce93d8;--blue:#90caf9;
   --bg:#0d0d0d;
+  --green-d:#1e3d1e;--green-b:#3a6b3a;--green-m:#4caf50;--green-l:#a5d6a7;
+  --red-d:#3d1e1e;--red-b:#6b3a3a;--red-m:#e53935;--red-l:#ef9a9a;
+  --yellow:#ffe082;--blue:#90caf9;--purple:#ce93d8;--orange:#ff8a65;
+  --surface:#111;--surface2:#1a1a1a;--border:#222;
+  --ur-bg:rgba(255,107,53,.25);--ur-c:#ff8a65;--ur-bd:rgba(255,107,53,.4);
+  --sr-bg:rgba(156,39,176,.25);--sr-c:#ce93d8;--sr-bd:rgba(156,39,176,.4);
+  --r-bg:rgba(21,101,192,.25);--r-c:#90caf9;--r-bd:rgba(21,101,192,.4);
 }
-html,body{height:100%;overflow:hidden;}
-body{
-  background:var(--bg);font-family:'Noto Sans JP',sans-serif;color:#fff;
-  display:flex;flex-direction:column;user-select:none;
+html,body{height:100%;overflow:hidden;background:var(--bg);}
+body{font-family:'Noto Sans JP',sans-serif;color:#fff;user-select:none;}
+
+/* ════════════════════════════════════════
+   SCREEN SWITCHER
+════════════════════════════════════════ */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+.screen.hidden{display:none!important;}
+
+/* ════════════════════════════════════════
+   MODE SELECT
+════════════════════════════════════════ */
+#scn-mode{
+  background:var(--bg);
+  background-image:radial-gradient(ellipse at 30% 30%,#0d1f0d,transparent 55%),
+                   radial-gradient(ellipse at 70% 70%,#1a0d0d,transparent 55%);
 }
-/* ── スクリーン切替 ── */
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
-.screen.hidden{display:none !important;}
-/* ─────────────────────────────────
-   モード選択画面
-───────────────────────────────── */
-#scn-mode{background:var(--bg);background-image:radial-gradient(ellipse at 30% 30%,#0d1f0d,transparent 55%),radial-gradient(ellipse at 70% 70%,#1a0d0d,transparent 55%);}
-.mode-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.4rem,5vw,2rem);letter-spacing:.12em;color:#e0e0e0;text-align:center;margin-bottom:6px;}
-.mode-sub{font-size:.7rem;color:#555;text-align:center;margin-bottom:28px;letter-spacing:.1em;}
-.mode-grid{width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px;}
-.mode-card{
-  background:#111;border:2px solid #2a2a2a;border-radius:12px;
-  padding:16px;cursor:pointer;transition:all .15s;
-}
-.mode-card:hover{border-color:#3a6b3a;transform:translateY(-2px);}
-.mode-card.selected{border-color:#4caf50;background:rgba(45,106,45,.1);}
-.mode-card-title{font-weight:700;font-size:.88rem;color:#e0e0e0;margin-bottom:4px;}
-.mode-card-desc{font-size:.72rem;color:#666;line-height:1.5;}
-.section-label{font-size:.65rem;color:#444;letter-spacing:.15em;text-transform:uppercase;margin:12px 0 6px;}
-.diff-row{display:flex;gap:8px;width:100%;max-width:340px;}
-.diff-btn{
-  flex:1;padding:10px;border-radius:10px;border:2px solid #2a2a2a;
-  background:#111;color:#666;cursor:pointer;font-family:'Noto Sans JP',sans-serif;
-  font-weight:700;font-size:.82rem;transition:all .15s;
-}
-.diff-btn:hover,.diff-btn.selected{border-color:#4caf50;color:#a5d6a7;background:rgba(45,106,45,.1);}
-.start-btn{
-  width:100%;max-width:340px;margin-top:16px;padding:14px;
-  background:linear-gradient(135deg,#1e3d1e,#0f2f0f);
-  border:2px solid var(--green-b);color:var(--green-l);
-  border-radius:12px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;
-  font-weight:900;font-size:.95rem;letter-spacing:.08em;
-  transition:all .15s;
-}
-.start-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(45,106,45,.4);}
+.mode-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.5rem,6vw,2.2rem);letter-spacing:.12em;color:#e0e0e0;margin-bottom:4px;}
+.mode-sub{font-size:.72rem;color:#555;margin-bottom:24px;letter-spacing:.08em;}
+.mode-grid{width:100%;max-width:360px;display:flex;flex-direction:column;gap:10px;}
+.mode-card{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .15s;}
+.mode-card:active{transform:scale(.97);}
+.mode-card.selected{border-color:var(--green-m);background:rgba(45,106,45,.1);}
+.mode-card-title{font-weight:700;font-size:.88rem;color:#e0e0e0;margin-bottom:3px;}
+.mode-card-desc{font-size:.7rem;color:#666;line-height:1.5;}
+.slabel{font-size:.62rem;color:#444;letter-spacing:.15em;text-transform:uppercase;margin:14px 0 6px;width:100%;max-width:360px;}
+.diff-row{display:flex;gap:8px;width:100%;max-width:360px;}
+.diff-btn{flex:1;padding:10px 8px;border-radius:10px;border:2px solid var(--border);background:var(--surface);color:#666;cursor:pointer;font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.8rem;line-height:1.4;transition:all .15s;}
+.diff-btn:active{transform:scale(.96);}
+.diff-btn.selected{border-color:var(--green-m);color:var(--green-l);background:rgba(45,106,45,.1);}
+.start-btn{width:100%;max-width:360px;margin-top:16px;padding:14px;background:linear-gradient(135deg,#1e3d1e,#0f2f0f);border:2px solid var(--green-b);color:var(--green-l);border-radius:12px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;font-weight:900;font-size:.95rem;letter-spacing:.08em;transition:all .15s;}
+.start-btn:active{transform:scale(.97);}
 .back-link{margin-top:14px;font-size:.72rem;color:#444;cursor:pointer;text-decoration:underline;}
 
-/* ─────────────────────────────────
-   ゲーム画面
-───────────────────────────────── */
+/* ════════════════════════════════════════
+   GAME SCREEN LAYOUT
+════════════════════════════════════════ */
 #scn-game{
   background:var(--bg);
-  background-image:radial-gradient(ellipse at 20% 20%,#0d1f0d,transparent 50%),radial-gradient(ellipse at 80% 80%,#1a0d0d,transparent 50%);
-  padding:0;justify-content:flex-start;overflow:hidden;
-  display:flex;flex-direction:column;
+  background-image:radial-gradient(ellipse at 20% 20%,#0d1f0d,transparent 50%),
+                   radial-gradient(ellipse at 80% 80%,#1a0d0d,transparent 50%);
+  padding:0;justify-content:flex-start;align-items:stretch;overflow:hidden;
 }
-/* トップバー */
-.topbar{
-  flex-shrink:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);
-  padding:8px 12px;display:flex;align-items:center;gap:8px;
-  border-bottom:1px solid #1a1a1a;
-}
-.tb-back{background:none;border:1px solid #333;color:#666;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.7rem;}
-.tb-info{display:flex;gap:6px;flex:1;align-items:center;flex-wrap:wrap;}
-.tb-badge{
-  padding:3px 8px;border-radius:6px;font-size:.68rem;font-weight:700;
-  font-family:'Bebas Neue',sans-serif;letter-spacing:.05em;
-}
-.tb-turn{background:rgba(255,255,255,.07);color:#aaa;}
-.tb-pt{background:rgba(212,160,23,.15);color:var(--yellow);}
-.tb-coin{background:rgba(255,193,7,.12);color:var(--yellow);}
-.tb-mental{background:rgba(33,150,243,.12);color:var(--blue);}
-.tb-sick{background:rgba(156,204,101,.12);color:#aed581;}
-.tb-audit{background:rgba(229,57,53,.18);color:#ef9a9a;animation:pulse .8s infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
-.tb-mode{font-size:.62rem;color:#444;margin-left:auto;}
 
-/* フェーズバー */
-.phasebar{
-  flex-shrink:0;padding:6px 12px;
-  background:rgba(0,0,0,.3);border-bottom:1px solid #1a1a1a;
-  display:flex;align-items:center;justify-content:space-between;gap:8px;
+/* ── ① ステータスバー（最上部） ── */
+.status-bar{
+  flex-shrink:0;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(10px);
+  border-bottom:1px solid #1f1f1f;
+  padding:0 10px;
 }
-.phase-label{font-size:.72rem;color:#aaa;font-weight:700;}
-.phase-action{font-size:.68rem;color:#66bb6a;}
-.phase-btn{
-  padding:4px 12px;border-radius:7px;border:none;cursor:pointer;
-  font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.72rem;
-  transition:all .15s;
+.status-row1{
+  display:flex;align-items:center;gap:6px;padding:8px 0 4px;
 }
-.pbtn-next{background:rgba(76,175,80,.18);color:#a5d6a7;border:1px solid #3a6b3a;}
-.pbtn-next:hover{background:rgba(76,175,80,.3);}
-.pbtn-end{background:rgba(229,57,53,.18);color:#ef9a9a;border:1px solid #6b3a3a;}
-.pbtn-end:hover{background:rgba(229,57,53,.3);}
-.pbtn-draw{background:rgba(255,193,7,.12);color:#ffe082;border:1px solid rgba(255,193,7,.3);}
-.pbtn-draw:disabled{opacity:.35;cursor:not-allowed;}
+.sb-back{background:none;border:1px solid #2a2a2a;color:#555;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.7rem;font-family:'Noto Sans JP',sans-serif;flex-shrink:0;}
+.sb-mode{font-size:.62rem;color:#444;flex:1;text-align:right;letter-spacing:.05em;}
+.sb-turn{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.1em;color:#666;flex-shrink:0;}
 
-/* メインエリア（スクロール可） */
-.game-main{flex:1;overflow-y:auto;padding:10px 10px 0;display:flex;flex-direction:column;gap:8px;}
+/* スコア＆ステータスパネル */
+.status-row2{
+  display:flex;gap:6px;padding:4px 0 8px;align-items:stretch;
+}
+/* ポイント（大きく） */
+.stat-pt{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,rgba(212,160,23,.18),rgba(212,160,23,.06));
+  border:1px solid rgba(212,160,23,.3);border-radius:10px;
+  padding:6px 14px;min-width:64px;
+}
+.stat-pt .sv{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--yellow);line-height:1;}
+.stat-pt .sl{font-size:.55rem;color:rgba(255,224,130,.5);letter-spacing:.12em;margin-top:2px;}
 
-/* ケースエリア */
-.cases-header{display:flex;align-items:center;justify-content:space-between;padding:0 2px;}
-.cases-title{font-size:.65rem;color:#555;letter-spacing:.15em;text-transform:uppercase;}
-.cases-sick{font-size:.65rem;color:#aed581;}
-.cases-grid{display:flex;gap:8px;flex-wrap:wrap;}
+/* コイン・メンタル */
+.stat-pair{
+  display:flex;gap:5px;flex:1;
+}
+.stat-block{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border-radius:10px;padding:5px 4px;
+}
+.stat-block.s-coin{background:rgba(255,193,7,.1);border:1px solid rgba(255,193,7,.22);}
+.stat-block.s-mental{background:rgba(33,150,243,.1);border:1px solid rgba(33,150,243,.22);}
+.stat-block.s-mental.low{background:rgba(229,57,53,.12);border-color:rgba(229,57,53,.3);}
+.stat-block .sv{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;line-height:1;}
+.stat-block.s-coin .sv{color:var(--yellow);}
+.stat-block.s-mental .sv{color:var(--blue);}
+.stat-block.s-mental.low .sv{color:var(--red-l);}
+.stat-block .sl{font-size:.5rem;letter-spacing:.08em;margin-top:1px;opacity:.5;}
 
-/* ケースカードUI */
+/* フラグ欄 */
+.stat-flags{
+  display:flex;flex-direction:column;gap:3px;justify-content:center;
+}
+.sflag{font-size:.6rem;padding:2px 6px;border-radius:5px;white-space:nowrap;font-weight:700;}
+.sf-sick{background:rgba(156,204,101,.15);border:1px solid rgba(156,204,101,.3);color:#aed581;}
+.sf-audit{background:rgba(229,57,53,.18);border:1px solid rgba(229,57,53,.35);color:var(--red-l);animation:fpulse .9s infinite;}
+@keyframes fpulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.sf-guard{background:rgba(33,150,243,.15);border:1px solid rgba(33,150,243,.3);color:var(--blue);}
+
+/* アクション情報 */
+.status-row3{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:5px 0 7px;border-top:1px solid #1a1a1a;
+}
+.phase-info{font-size:.7rem;color:#aaa;font-weight:700;}
+.action-count{
+  font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.05em;
+  color:var(--green-l);
+}
+.action-count.zero{color:#555;}
+.phase-btn{padding:5px 14px;border-radius:7px;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.72rem;}
+.pb-end{background:rgba(229,57,53,.15);color:var(--red-l);border:1px solid rgba(229,57,53,.3);}
+.pb-end:disabled{opacity:.3;cursor:not-allowed;}
+.pb-next{background:rgba(76,175,80,.15);color:var(--green-l);border:1px solid rgba(76,175,80,.3);}
+
+/* ── ② ケースエリア（中央・スクロール可） ── */
+.cases-area{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:10px;
+  display:flex;flex-direction:column;gap:8px;
+  -webkit-overflow-scrolling:touch;
+}
+.cases-label{font-size:.6rem;color:#444;letter-spacing:.14em;text-transform:uppercase;margin-bottom:2px;}
+.cases-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:8px;
+}
+
+/* ── ケースカード（sample.html準拠） ── */
 .case-card{
-  background:linear-gradient(160deg,#3d1e1e,#1f0f0f);
-  border:2px solid #6b3a3a;border-radius:10px;
-  width:calc(50% - 4px);min-width:140px;max-width:180px;
-  cursor:pointer;transition:all .15s;overflow:hidden;flex-shrink:0;
-  position:relative;
+  background:linear-gradient(160deg,var(--red-d),#1f0f0f);
+  border:2px solid var(--red-b);border-radius:12px;
+  cursor:pointer;transition:transform .15s,box-shadow .15s;
+  overflow:hidden;position:relative;
 }
-.case-card:hover{transform:translateY(-2px);border-color:#9a4a4a;}
-.case-card.targeted{border-color:#4caf50 !important;box-shadow:0 0 12px rgba(76,175,80,.4);}
-.case-card.illegal-glow{border-color:#ef5350 !important;box-shadow:0 0 10px rgba(229,57,53,.4);}
-.case-card.audit-glow{border-color:#ff5722 !important;animation:auditPulse 1s infinite;}
-@keyframes auditPulse{0%,100%{box-shadow:0 0 8px rgba(255,87,34,.4);}50%{box-shadow:0 0 18px rgba(255,87,34,.7);}}
-.cc-header{padding:7px 8px 5px;display:flex;justify-content:space-between;align-items:flex-start;}
-.cc-name{font-size:.72rem;font-weight:700;color:#ef9a9a;line-height:1.2;flex:1;}
-.cc-pt{
-  font-family:'Bebas Neue',sans-serif;font-size:.75rem;
-  background:linear-gradient(135deg,#d4a017,#f5c842);
-  color:#1a1000;width:18px;height:18px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.cc-pt.hard{background:linear-gradient(135deg,#e53935,#ff7043);color:#fff;}
-.cc-type{font-size:.58rem;padding:1px 4px;border-radius:3px;margin-top:2px;display:inline-block;}
-.cc-stats{padding:4px 8px;display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
-.cc-stat{font-size:.65rem;padding:1px 5px;border-radius:4px;}
-.s-coin{background:rgba(255,193,7,.1);color:#ffe082;border:1px solid rgba(255,193,7,.2);}
-.s-mental{background:rgba(33,150,243,.1);color:#90caf9;border:1px solid rgba(33,150,243,.2);}
-.cc-markers{padding:2px 8px 5px;display:flex;gap:4px;flex-wrap:wrap;}
-.mk{font-size:.58rem;padding:1px 4px;border-radius:3px;display:flex;align-items:center;gap:2px;}
-.mk-anger{background:rgba(255,87,34,.18);border:1px solid rgba(255,87,34,.35);color:#ff8a65;}
-.mk-illegal{background:rgba(244,67,54,.2);border:1px solid rgba(244,67,54,.38);color:#ef9a9a;}
+.case-card:active{transform:scale(.97);}
+.case-card.targeted{border-color:var(--green-m)!important;box-shadow:0 0 14px rgba(76,175,80,.45);}
+.case-card.illegal-glow{border-color:var(--red-m)!important;box-shadow:0 0 10px rgba(229,57,53,.35);}
+.case-card.audit-glow{animation:auditPulse 1s infinite;}
+@keyframes auditPulse{0%,100%{box-shadow:0 0 8px rgba(255,87,34,.4);}50%{box-shadow:0 0 20px rgba(255,87,34,.7);}}
+
+/* ケースカードヘッダー */
+.cc-hdr{padding:8px 10px 5px;display:flex;align-items:flex-start;justify-content:space-between;gap:4px;}
+.cc-left{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
+.cc-id{font-size:.55rem;opacity:.35;font-family:'Bebas Neue',sans-serif;letter-spacing:.08em;}
+.cc-name{font-size:.82rem;font-weight:700;color:var(--red-l);line-height:1.2;}
+.cc-sub{display:flex;gap:3px;align-items:center;margin-top:2px;flex-wrap:wrap;}
+.cc-meta{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
+.cc-meta-top{display:flex;align-items:center;gap:3px;}
+
+/* ポイントバッジ */
+.pt-badge{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#d4a017,#f5c842);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.78rem;color:#1a1000;box-shadow:0 2px 6px rgba(212,160,23,.5);}
+.pt-badge.hard{background:linear-gradient(135deg,#e53935,#ff7043);color:#fff;box-shadow:0 2px 6px rgba(229,57,53,.5);}
+.rar{font-family:'Bebas Neue',sans-serif;font-size:.68rem;padding:1px 4px;border-radius:3px;line-height:1.5;}
+.r-ur{background:var(--ur-bg);color:var(--ur-c);border:1px solid var(--ur-bd);}
+.r-sr{background:var(--sr-bg);color:var(--sr-c);border:1px solid var(--sr-bd);}
+.r-r{background:var(--r-bg);color:var(--r-c);border:1px solid var(--r-bd);}
+
+/* バッジ系 */
+.bdg{font-size:.56rem;padding:1px 4px;border-radius:3px;line-height:1.5;}
+.bdg-income-no{background:rgba(255,255,255,.04);color:#555;border:1px solid rgba(255,255,255,.07);}
+.bdg-income-yes{background:rgba(255,193,7,.15);color:#ffd54f;border:1px solid rgba(255,193,7,.3);}
+
+/* ケースカード画像エリア */
+.cc-img{height:70px;margin:0 8px;border-radius:6px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#4d1b1b,#6b2d2d);}
+.cc-img-grad{position:absolute;inset:0;opacity:.3;background:radial-gradient(ellipse at 40% 60%,#ef5350,transparent 55%),radial-gradient(ellipse at 75% 30%,#b71c1c,transparent 50%);}
+.cc-noimg{font-size:.58rem;opacity:.2;letter-spacing:.12em;text-transform:uppercase;z-index:1;}
+
+/* マーカー */
+.cc-markers{display:flex;gap:3px;padding:5px 8px 3px;flex-wrap:wrap;min-height:24px;}
+.mk{display:flex;align-items:center;gap:2px;font-size:.56rem;padding:1px 4px;border-radius:3px;line-height:1;}
+.mk-anger{background:rgba(255,87,34,.17);border:1px solid rgba(255,87,34,.34);color:#ff8a65;}
+.mk-illegal{background:rgba(244,67,54,.18);border:1px solid rgba(244,67,54,.36);color:var(--red-l);}
 .mk-sick{background:rgba(156,204,101,.12);border:1px solid rgba(156,204,101,.3);color:#aed581;}
-.mk-meet{background:rgba(33,150,243,.12);border:1px solid rgba(33,150,243,.3);color:#90caf9;}
-.mk-visit{background:rgba(156,39,176,.12);border:1px solid rgba(156,39,176,.3);color:#ce93d8;}
-.mk-mgmt{background:rgba(255,193,7,.12);border:1px solid rgba(255,193,7,.3);color:#ffe082;}
+.mk-meet{background:rgba(33,150,243,.12);border:1px solid rgba(33,150,243,.3);color:var(--blue);}
+.mk-visit{background:rgba(156,39,176,.12);border:1px solid rgba(156,39,176,.3);color:var(--purple);}
+.mk-mgmt{background:rgba(255,193,7,.12);border:1px solid rgba(255,193,7,.3);color:var(--yellow);}
+.mk-ind{background:rgba(76,175,80,.14);border:1px solid rgba(76,175,80,.3);color:var(--green-l);}
 .pips{display:flex;gap:2px;align-items:center;}
 .pip{width:6px;height:6px;border-radius:50%;border:1px solid rgba(255,87,34,.4);}
 .pip.on{background:#ff5722;border-color:#ff5722;}
 
-/* 手札エリア */
-.hand-area{flex-shrink:0;padding:0 0 8px;}
-.hand-header{display:flex;align-items:center;justify-content:space-between;padding:0 10px;margin-bottom:6px;}
-.hand-title{font-size:.65rem;color:#555;letter-spacing:.15em;text-transform:uppercase;}
-.hand-count{font-size:.65rem;color:#444;}
-.hand-scroll{display:flex;gap:8px;overflow-x:auto;padding:2px 10px 4px;scrollbar-width:thin;scrollbar-color:#222 transparent;}
-.hand-scroll::-webkit-scrollbar{height:3px;}
-.hand-scroll::-webkit-scrollbar-track{background:transparent;}
-.hand-scroll::-webkit-scrollbar-thumb{background:#222;border-radius:3px;}
-
-/* ワーカーカードUI（手札） */
-.worker-card{
-  background:linear-gradient(160deg,#1e3d1e,#0f1f0f);
-  border:2px solid #3a6b3a;border-radius:9px;
-  min-width:120px;max-width:130px;flex-shrink:0;
-  cursor:pointer;transition:all .15s;overflow:hidden;
-  position:relative;
-}
-.worker-card:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(45,106,45,.4);}
-.worker-card.selected{border-color:#ffcc02 !important;box-shadow:0 0 14px rgba(255,204,2,.5);transform:translateY(-6px);}
-.worker-card.unusable{opacity:.4;cursor:not-allowed;}
-.wc-top{padding:6px 8px 4px;display:flex;justify-content:space-between;align-items:flex-start;}
-.wc-name{font-size:.7rem;font-weight:700;color:#a5d6a7;line-height:1.2;flex:1;}
-.wc-rar{font-family:'Bebas Neue',sans-serif;font-size:.65rem;padding:1px 4px;border-radius:3px;}
-.r-ur{background:rgba(255,107,53,.25);color:#ff8a65;border:1px solid rgba(255,107,53,.4);}
-.r-sr{background:rgba(156,39,176,.25);color:#ce93d8;border:1px solid rgba(156,39,176,.4);}
-.r-r{background:rgba(21,101,192,.25);color:#90caf9;border:1px solid rgba(21,101,192,.4);}
-.wc-body{padding:3px 8px 6px;display:flex;flex-direction:column;gap:2px;}
-.wc-row{display:flex;gap:3px;flex-wrap:wrap;}
-.tag{font-size:.57rem;padding:1px 4px;border-radius:3px;white-space:nowrap;line-height:1.5;}
-.t-target{background:rgba(255,255,255,.06);color:#bbb;border:1px solid rgba(255,255,255,.1);}
-.t-cond{background:rgba(255,193,7,.1);color:#ffe082;border:1px solid rgba(255,193,7,.2);}
-.t-plus{background:rgba(76,175,80,.13);color:#a5d6a7;border:1px solid rgba(76,175,80,.26);font-weight:700;}
-.t-minus{background:rgba(229,57,53,.13);color:#ef9a9a;border:1px solid rgba(229,57,53,.26);font-weight:700;}
+/* ケースカード下部 */
+.cc-body{padding:4px 8px 8px;display:flex;flex-direction:column;gap:3px;}
+.cc-stats-row{display:flex;gap:4px;}
+.cc-stat{display:flex;align-items:center;gap:2px;font-size:.64rem;padding:2px 5px;border-radius:4px;}
+.cs-coin{background:rgba(255,193,7,.1);color:var(--yellow);border:1px solid rgba(255,193,7,.2);}
+.cs-mental{background:rgba(33,150,243,.1);color:var(--blue);border:1px solid rgba(33,150,243,.2);}
+.cs-sick{background:rgba(156,204,101,.1);color:#aed581;border:1px solid rgba(156,204,101,.2);}
+.cc-divider{height:1px;background:rgba(229,57,53,.15);margin:2px 0;}
+.cc-effects{display:flex;gap:3px;flex-wrap:wrap;}
+.tag{font-size:.57rem;padding:1px 4px;border-radius:3px;white-space:nowrap;line-height:1.6;font-weight:500;}
+.t-plus{background:rgba(76,175,80,.13);color:var(--green-l);border:1px solid rgba(76,175,80,.26);font-weight:700;}
+.t-minus{background:rgba(229,57,53,.13);color:var(--red-l);border:1px solid rgba(229,57,53,.26);font-weight:700;}
 .t-neutral{background:rgba(255,255,255,.05);color:#bbb;border:1px solid rgba(255,255,255,.09);}
-.t-special{background:rgba(156,39,176,.13);color:#ce93d8;border:1px solid rgba(156,39,176,.26);}
+.t-special{background:rgba(156,39,176,.13);color:var(--purple);border:1px solid rgba(156,39,176,.26);}
+.t-target{background:rgba(255,255,255,.06);color:#bbb;border:1px solid rgba(255,255,255,.09);}
+.t-cond{background:rgba(255,193,7,.1);color:var(--yellow);border:1px solid rgba(255,193,7,.2);}
+.ill-cond{font-size:.55rem;color:var(--red-l);opacity:.7;padding:1px 4px;border-radius:3px;border:1px dashed rgba(229,57,53,.26);background:rgba(229,57,53,.04);}
 
-/* ボトムボタン */
-.bottombar{flex-shrink:0;padding:8px 10px;background:rgba(0,0,0,.4);border-top:1px solid #1a1a1a;display:flex;gap:8px;}
-.bot-btn{
-  flex:1;padding:10px;border-radius:10px;border:none;cursor:pointer;
-  font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.78rem;
-  transition:all .15s;
+/* ── ③ 手札エリア（画面最下部） ── */
+.hand-area{
+  flex-shrink:0;
+  background:rgba(0,0,0,.5);backdrop-filter:blur(8px);
+  border-top:1px solid #1a1a1a;
+  padding-bottom:env(safe-area-inset-bottom);
 }
-.bot-btn:active{transform:scale(.96);}
-.bbtn-draw{background:rgba(255,193,7,.12);color:var(--yellow);border:1px solid rgba(255,193,7,.25);}
-.bbtn-draw:disabled{opacity:.3;cursor:not-allowed;}
-.bbtn-end{background:rgba(229,57,53,.15);color:#ef9a9a;border:1px solid rgba(229,57,53,.25);}
-.bbtn-end:disabled{opacity:.3;cursor:not-allowed;}
-.bbtn-cancel{background:rgba(255,255,255,.05);color:#666;border:1px solid #2a2a2a;}
+.hand-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 12px 4px;
+}
+.hand-title{font-size:.62rem;color:#444;letter-spacing:.12em;text-transform:uppercase;}
+.hand-meta{display:flex;align-items:center;gap:8px;}
+.hand-count{font-size:.62rem;color:#444;}
+.hand-draw-btn{
+  padding:4px 12px;border-radius:6px;border:1px solid rgba(255,193,7,.28);
+  background:rgba(255,193,7,.1);color:var(--yellow);
+  font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.68rem;cursor:pointer;
+}
+.hand-draw-btn:disabled{opacity:.25;cursor:not-allowed;}
+.hand-end-btn{
+  padding:4px 12px;border-radius:6px;border:1px solid rgba(229,57,53,.28);
+  background:rgba(229,57,53,.1);color:var(--red-l);
+  font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.68rem;cursor:pointer;
+}
+.hand-end-btn:disabled{opacity:.25;cursor:not-allowed;}
+.hand-cancel-btn{
+  padding:4px 10px;border-radius:6px;border:1px solid #2a2a2a;
+  background:rgba(255,255,255,.04);color:#555;
+  font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.65rem;cursor:pointer;
+}
 
-/* ログエリア */
-.log-area{flex-shrink:0;max-height:90px;overflow-y:auto;padding:6px 10px;background:rgba(0,0,0,.3);border-top:1px solid #1a1a1a;}
-.log-entry{font-size:.65rem;color:#666;padding:1px 0;line-height:1.5;}
-.log-entry.important{color:#ffe082;}
-.log-entry.danger{color:#ef9a9a;}
-.log-entry.good{color:#a5d6a7;}
+.hand-scroll{
+  display:flex;gap:8px;overflow-x:auto;
+  padding:0 10px 10px;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;scrollbar-color:#1a1a1a transparent;
+}
+.hand-scroll::-webkit-scrollbar{height:3px;}
+.hand-scroll::-webkit-scrollbar-thumb{background:#1a1a1a;border-radius:2px;}
 
-/* ─────────────────────────────────
-   モーダル群
-───────────────────────────────── */
-.modal-bg{
-  position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);
-  z-index:50;display:flex;align-items:center;justify-content:center;
-  padding:16px;
+/* ── ワーカーカード（手札・sample準拠） ── */
+.wk-card{
+  background:linear-gradient(160deg,var(--green-d),#0f1f0f);
+  border:2px solid var(--green-b);border-radius:11px;
+  min-width:130px;max-width:140px;flex-shrink:0;
+  cursor:pointer;transition:transform .15s,box-shadow .15s;
+  overflow:hidden;position:relative;
 }
-.modal-bg.hidden{display:none !important;}
-.modal{
-  background:#111;border-radius:14px;padding:22px;
-  max-width:320px;width:100%;max-height:85vh;overflow-y:auto;
-  animation:mIn .18s ease;
+.wk-card:active{transform:scale(.96);}
+.wk-card.selected{
+  border-color:#ffcc02!important;
+  box-shadow:0 0 16px rgba(255,204,2,.5);
+  transform:translateY(-8px);
 }
-@keyframes mIn{from{opacity:0;transform:scale(.92);}to{opacity:1;transform:scale(1);}}
-.modal-title{font-size:1rem;font-weight:700;margin-bottom:12px;color:#e0e0e0;}
-.modal-text{font-size:.8rem;line-height:1.7;color:#aaa;margin-bottom:14px;white-space:pre-wrap;}
-.modal-btns{display:flex;gap:8px;flex-wrap:wrap;}
-.mbtn{
-  flex:1;padding:9px;border-radius:8px;border:none;cursor:pointer;
-  font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.8rem;min-width:80px;
-  transition:opacity .15s;
-}
-.mbtn:hover{opacity:.82;}
-.mbtn-use{background:#2d6a2d;color:#a5d6a7;}
-.mbtn-cancel{background:#222;color:#666;}
-.mbtn-ok{background:#1a3d5c;color:#90caf9;}
-.mbtn-close{background:#222;color:#666;}
+.wk-card.unusable{opacity:.35;cursor:not-allowed;}
+.wk-hdr{padding:7px 9px 4px;display:flex;align-items:flex-start;justify-content:space-between;gap:4px;}
+.wk-left{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;}
+.wk-id{font-size:.55rem;opacity:.35;font-family:'Bebas Neue',sans-serif;letter-spacing:.08em;}
+.wk-name{font-size:.78rem;font-weight:700;color:var(--green-l);line-height:1.2;}
+.wk-sub{display:flex;gap:3px;margin-top:2px;flex-wrap:wrap;}
+.wk-meta{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;}
+.bdg-type-w{font-size:.54rem;padding:1px 4px;border-radius:3px;background:rgba(76,175,80,.18);color:#81c784;line-height:1.5;}
+.wk-body{padding:3px 9px 7px;display:flex;flex-direction:column;gap:3px;}
+.wk-row{display:flex;gap:3px;flex-wrap:wrap;}
+.wk-img{height:60px;margin:0 7px;border-radius:5px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1b4d1b,#2d6b2d);}
+.wk-img-grad{position:absolute;inset:0;opacity:.28;background:radial-gradient(ellipse at 30% 60%,#66bb6a,transparent 55%),radial-gradient(ellipse at 80% 30%,#388e3c,transparent 50%);}
+.wk-noimg{font-size:.55rem;opacity:.2;letter-spacing:.12em;text-transform:uppercase;z-index:1;}
 
-/* ターゲット選択リスト */
-.target-list{display:flex;flex-direction:column;gap:6px;margin:10px 0;}
-.target-item{
-  background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;
-  padding:8px 12px;cursor:pointer;transition:all .15s;
-  font-size:.8rem;display:flex;justify-content:space-between;align-items:center;
+/* ════════════════════════════════════════
+   LOG
+════════════════════════════════════════ */
+.log-area{
+  flex-shrink:0;height:72px;overflow-y:auto;
+  padding:4px 12px;background:rgba(0,0,0,.25);
+  border-top:1px solid #151515;
+  scrollbar-width:none;
 }
-.target-item:hover{border-color:#4caf50;background:rgba(45,106,45,.1);}
-.target-item-name{color:#e0e0e0;font-weight:700;}
-.target-item-stats{font-size:.68rem;color:#666;}
+.log-area::-webkit-scrollbar{display:none;}
+.log-line{font-size:.63rem;color:#555;padding:1px 0;line-height:1.5;}
+.log-line.lc-good{color:var(--green-l);}
+.log-line.lc-danger{color:var(--red-l);}
+.log-line.lc-info{color:var(--yellow);}
 
-/* トラブルポップアップ */
-#modal-trouble .modal{border:2px solid #555;box-shadow:0 0 40px rgba(255,100,50,.25);text-align:center;}
-.trouble-icon{font-size:2.2rem;margin-bottom:8px;}
-.trouble-name{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.1em;color:#ff8a65;margin-bottom:10px;}
+/* ════════════════════════════════════════
+   MODALS
+════════════════════════════════════════ */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(7px);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;}
+.modal-bg.hidden{display:none!important;}
+.modal{background:#0f0f0f;border-radius:14px;padding:20px;max-width:320px;width:100%;max-height:88vh;overflow-y:auto;animation:mIn .18s ease;}
+@keyframes mIn{from{opacity:0;transform:scale(.9)translateY(10px);}to{opacity:1;transform:scale(1)translateY(0);}}
+.modal-title{font-size:.98rem;font-weight:700;margin-bottom:10px;color:#e0e0e0;}
+.modal-text{font-size:.78rem;line-height:1.72;color:#999;margin-bottom:14px;white-space:pre-wrap;}
+.modal-btns{display:flex;gap:7px;flex-wrap:wrap;}
+.mbtn{flex:1;min-width:80px;padding:9px;border-radius:8px;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.78rem;transition:opacity .15s;}
+.mbtn:active{opacity:.7;}
+.mbtn-use{background:#2d6a2d;color:var(--green-l);}
+.mbtn-cancel{background:#1e1e1e;color:#666;border:1px solid #2a2a2a;}
+.mbtn-ok{background:#1a3d5c;color:var(--blue);}
+.mbtn-close{background:#1e1e1e;color:#666;border:1px solid #2a2a2a;}
+
+/* トラブルモーダル */
+.t-modal{border:2px solid #555;box-shadow:0 0 40px rgba(255,100,50,.22);text-align:center;}
+.t-icon{font-size:2.4rem;margin-bottom:8px;}
+.t-name{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.1em;color:var(--orange);margin-bottom:10px;}
 
 /* ルーレット */
-#modal-roulette .modal{border:2px solid #555;text-align:center;}
-.roulette-wheel{font-size:2.5rem;margin:10px 0;display:block;}
-.roulette-result{font-size:1rem;font-weight:700;color:#ffe082;margin:8px 0;}
+.rl-wheel{font-size:2.8rem;margin:8px 0;display:block;text-align:center;}
+.rl-result{font-size:1rem;font-weight:700;color:var(--yellow);margin:6px 0;text-align:center;}
 
-/* カード捨て札選択 */
-.discard-grid{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;margin:8px 0;}
-.discard-item{
-  background:#1a1a1a;border:1px solid #2a2a2a;border-radius:7px;
-  padding:7px 12px;cursor:pointer;font-size:.78rem;transition:all .15s;
-  display:flex;justify-content:space-between;
-}
-.discard-item:hover{border-color:#6b3a3a;}
-.discard-item.selected{border-color:#ef5350;background:rgba(139,26,26,.2);}
+/* ターゲット選択 */
+.target-list{display:flex;flex-direction:column;gap:5px;margin:8px 0;}
+.target-item{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;cursor:pointer;transition:all .15s;display:flex;justify-content:space-between;align-items:center;}
+.target-item:active{transform:scale(.97);background:rgba(45,106,45,.12);border-color:var(--green-m);}
+.ti-name{font-size:.8rem;color:#e0e0e0;font-weight:700;}
+.ti-stats{font-size:.66rem;color:#666;}
 
-/* ゲームオーバー / クリア */
-#scn-over,#scn-win{
-  background:var(--bg);
-  background-image:radial-gradient(ellipse at 50% 40%,#2a0d0d,transparent 60%);
-  text-align:center;gap:14px;
-}
-#scn-win{background-image:radial-gradient(ellipse at 50% 40%,#0d2a0d,transparent 60%);}
-.result-icon{font-size:3rem;}
-.result-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.15em;}
-#scn-over .result-title{color:#ef9a9a;}
-#scn-win .result-title{color:#a5d6a7;}
-.result-sub{font-size:.82rem;color:#666;line-height:1.6;}
-.result-stats{background:#111;border:1px solid #222;border-radius:12px;padding:14px 20px;width:100%;max-width:280px;}
-.rs-row{display:flex;justify-content:space-between;padding:5px 0;font-size:.82rem;border-bottom:1px solid #1a1a1a;}
+/* 捨て札選択 */
+.discard-grid{display:flex;flex-direction:column;gap:5px;max-height:200px;overflow-y:auto;margin:8px 0;}
+.discard-item{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:7px;padding:7px 12px;cursor:pointer;font-size:.78rem;transition:all .15s;display:flex;justify-content:space-between;}
+.discard-item:active{transform:scale(.97);}
+.discard-item.sel{border-color:var(--red-m);background:rgba(139,26,26,.2);}
+
+/* ════════════════════════════════════════
+   RESULT SCREENS
+════════════════════════════════════════ */
+#scn-over{background:var(--bg);background-image:radial-gradient(ellipse at 50% 40%,#2a0d0d,transparent 60%);}
+#scn-win{background:var(--bg);background-image:radial-gradient(ellipse at 50% 40%,#0d2a0d,transparent 60%);}
+.result-icon{font-size:3rem;margin-bottom:6px;}
+.result-title{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:.15em;margin-bottom:4px;}
+#scn-over .result-title{color:var(--red-l);}
+#scn-win .result-title{color:var(--green-l);}
+.result-reason{font-size:.8rem;color:#555;margin-bottom:20px;text-align:center;}
+.result-stats{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 20px;width:100%;max-width:280px;margin-bottom:16px;}
+.rs-row{display:flex;justify-content:space-between;padding:5px 0;font-size:.8rem;border-bottom:1px solid #1a1a1a;}
 .rs-row:last-child{border-bottom:none;}
 .rs-label{color:#555;}
 .rs-val{color:#e0e0e0;font-weight:700;}
-.result-btn{
-  padding:12px 32px;border-radius:12px;border:none;cursor:pointer;
-  font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.9rem;
-}
-.rbtn-retry{background:linear-gradient(135deg,#1e3d1e,#0f2f0f);color:#a5d6a7;border:2px solid #3a6b3a;}
-.rbtn-menu{background:#1a1a1a;color:#666;border:1px solid #333;margin-top:8px;}
+.rbtn{padding:12px 32px;border-radius:12px;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.88rem;margin-bottom:8px;}
+.rbtn-retry{background:linear-gradient(135deg,#1e3d1e,#0f2f0f);color:var(--green-l);border:2px solid var(--green-b);}
+.rbtn-menu{background:var(--surface2);color:#666;border:1px solid var(--border);}
 </style>
 </head>
 <body>
 
-<!-- ── モード選択 ── -->
+<!-- ══════════════════════════════
+     MODE SELECT
+══════════════════════════════ -->
 <div class="screen" id="scn-mode">
   <div class="mode-title">1人モード</div>
   <div class="mode-sub">モードと難易度を選択してスタート</div>
@@ -315,325 +385,332 @@ body{
       <div class="mode-card-desc">クリアなし。限界まで担当ケースを管理し、ランキングを狙え。</div>
     </div>
   </div>
-  <div class="section-label">難易度</div>
+  <div class="slabel">難易度</div>
   <div class="diff-row">
-    <button class="diff-btn selected" id="diff-normal" onclick="selectDiff('normal')">🟢 ノーマル<br><span style="font-size:.65rem;font-weight:400;color:#555;">奇数ターンのみケース追加</span></button>
-    <button class="diff-btn" id="diff-hard" onclick="selectDiff('hard')">🔴 ハード<br><span style="font-size:.65rem;font-weight:400;color:#555;">毎ターンケース追加</span></button>
+    <button class="diff-btn selected" id="diff-normal" onclick="selectDiff('normal')">
+      🟢 ノーマル<br><span style="font-size:.62rem;font-weight:400;color:#555;">奇数T ケース追加</span>
+    </button>
+    <button class="diff-btn" id="diff-hard" onclick="selectDiff('hard')">
+      🔴 ハード<br><span style="font-size:.62rem;font-weight:400;color:#555;">毎T ケース追加</span>
+    </button>
   </div>
   <button class="start-btn" onclick="startGame()">ゲームスタート ▶</button>
   <div class="back-link" onclick="location.href='index.html'">← メニューに戻る</div>
 </div>
 
-<!-- ── ゲーム画面 ── -->
-<div class="screen hidden" id="scn-game" style="position:relative;padding:0;">
-  <!-- トップバー -->
-  <div class="topbar">
-    <button class="tb-back" onclick="confirmQuit()">✕</button>
-    <div class="tb-info" id="tb-info"></div>
-    <span class="tb-mode" id="tb-mode"></span>
-  </div>
-  <!-- フェーズバー -->
-  <div class="phasebar">
-    <span class="phase-label" id="phase-label">—</span>
-    <div style="display:flex;gap:6px;">
-      <button class="phase-btn pbtn-draw" id="btn-xdraw" onclick="extraDraw()" style="display:none">💰-1 ドロー</button>
-      <button class="phase-btn pbtn-next" id="btn-next" onclick="advancePhase()" style="display:none">次へ ▶</button>
+<!-- ══════════════════════════════
+     GAME SCREEN
+══════════════════════════════ -->
+<div class="screen hidden" id="scn-game" style="padding:0;position:relative;">
+
+  <!-- ① ステータスバー -->
+  <div class="status-bar">
+    <div class="status-row1">
+      <button class="sb-back" onclick="confirmQuit()">✕</button>
+      <span class="sb-turn" id="sb-turn">T1</span>
+      <span class="sb-mode" id="sb-mode"></span>
+    </div>
+    <div class="status-row2">
+      <div class="stat-pt">
+        <div class="sv" id="st-pt">0</div>
+        <div class="sl">POINT</div>
+      </div>
+      <div class="stat-pair">
+        <div class="stat-block s-coin">
+          <div class="sv" id="st-coin">2</div>
+          <div class="sl">💰 コイン</div>
+        </div>
+        <div class="stat-block s-mental" id="st-mental-block">
+          <div class="sv" id="st-mental">5</div>
+          <div class="sl">🧠 メンタル</div>
+        </div>
+      </div>
+      <div class="stat-flags" id="st-flags"></div>
+    </div>
+    <div class="status-row3">
+      <div>
+        <div class="phase-info" id="phase-info">—</div>
+        <div class="action-count" id="action-count"></div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="phase-btn pb-end" id="btn-end-turn" onclick="endPlayerTurn()" disabled>
+          ターン終了
+        </button>
+      </div>
     </div>
   </div>
-  <!-- メイン -->
-  <div class="game-main" id="game-main">
-    <div class="cases-header">
-      <span class="cases-title">担当ケース</span>
-      <span class="cases-sick" id="sick-label"></span>
-    </div>
+
+  <!-- ② ケースエリア -->
+  <div class="cases-area" id="cases-area">
+    <div class="cases-label">担当ケース</div>
     <div class="cases-grid" id="cases-grid"></div>
-    <div style="flex:1"></div>
   </div>
-  <!-- 手札 -->
+
+  <!-- ログ -->
+  <div class="log-area" id="log-area"></div>
+
+  <!-- ③ 手札エリア -->
   <div class="hand-area">
     <div class="hand-header">
       <span class="hand-title">手札</span>
-      <span class="hand-count" id="hand-count"></span>
+      <div class="hand-meta">
+        <button class="hand-cancel-btn" id="btn-cancel" onclick="cancelSelect()" style="display:none">選択解除</button>
+        <button class="hand-draw-btn"   id="btn-xdraw"  onclick="extraDraw()" disabled>💰-1 ドロー</button>
+        <span class="hand-count" id="hand-count">0/7</span>
+      </div>
     </div>
     <div class="hand-scroll" id="hand-scroll"></div>
   </div>
-  <!-- ボトムバー -->
-  <div class="bottombar">
-    <button class="bot-btn bbtn-draw" id="bbtn-draw" onclick="extraDraw()" disabled>💰-1 追加ドロー</button>
-    <button class="bot-btn bbtn-cancel" id="bbtn-cancel" onclick="cancelSelect()" style="display:none">選択解除</button>
-    <button class="bot-btn bbtn-end" id="bbtn-end" onclick="endPlayerTurn()" disabled>ターン終了</button>
-  </div>
-  <!-- ログ -->
-  <div class="log-area" id="log-area"></div>
 </div>
 
-<!-- ── ゲームオーバー ── -->
+<!-- ══════════════════════════════
+     GAME OVER
+══════════════════════════════ -->
 <div class="screen hidden" id="scn-over">
   <div class="result-icon" id="over-icon">💀</div>
   <div class="result-title">GAME OVER</div>
-  <div class="result-sub" id="over-reason">担当ケースを管理しきれませんでした。</div>
+  <div class="result-reason" id="over-reason">—</div>
   <div class="result-stats" id="over-stats"></div>
-  <button class="result-btn rbtn-retry" onclick="returnToMode()">もう一度</button>
-  <button class="result-btn rbtn-menu" onclick="location.href='index.html'">メニューへ</button>
+  <button class="rbtn rbtn-retry" onclick="returnToMode()">もう一度</button>
+  <button class="rbtn rbtn-menu"  onclick="location.href='index.html'">メニューへ</button>
 </div>
 
-<!-- ── クリア ── -->
+<!-- ══════════════════════════════
+     CLEAR
+══════════════════════════════ -->
 <div class="screen hidden" id="scn-win">
   <div class="result-icon">🏆</div>
   <div class="result-title">CLEAR!</div>
-  <div class="result-sub">5ポイントを達成しました！</div>
+  <div class="result-reason">5ポイントを達成しました！</div>
   <div class="result-stats" id="win-stats"></div>
-  <button class="result-btn rbtn-retry" onclick="returnToMode()">もう一度</button>
-  <button class="result-btn rbtn-menu" onclick="location.href='index.html'">メニューへ</button>
+  <button class="rbtn rbtn-retry" onclick="returnToMode()">もう一度</button>
+  <button class="rbtn rbtn-menu"  onclick="location.href='index.html'">メニューへ</button>
 </div>
 
-<!-- ── カード詳細・使用モーダル ── -->
+<!-- ══ モーダル群 ══ -->
+<!-- カード詳細 / 使用 -->
 <div class="modal-bg hidden" id="modal-card">
-  <div class="modal" style="border:2px solid #3a6b3a;">
-    <div class="modal-title" id="mc-name"></div>
-    <div class="modal-text" id="mc-detail"></div>
+  <div class="modal" style="border:2px solid var(--green-b);">
+    <div class="modal-title" id="mc-title">—</div>
+    <div class="modal-text"  id="mc-detail"></div>
     <div id="mc-targets"></div>
-    <div class="modal-btns" style="margin-top:8px;">
-      <button class="mbtn mbtn-cancel" onclick="closeModal('modal-card')">キャンセル</button>
+    <div class="modal-btns" id="mc-btns" style="margin-top:8px;">
+      <button class="mbtn mbtn-cancel" onclick="closeModal('modal-card');cancelSelect()">キャンセル</button>
     </div>
   </div>
 </div>
 
-<!-- ── トラブルモーダル ── -->
+<!-- トラブル -->
 <div class="modal-bg hidden" id="modal-trouble">
-  <div class="modal" style="border:2px solid #555;">
-    <div class="trouble-icon" id="mt-icon"></div>
-    <div class="trouble-name" id="mt-name"></div>
+  <div class="modal t-modal">
+    <div class="t-icon" id="mt-icon">⚠️</div>
+    <div class="t-name" id="mt-name">—</div>
     <div class="modal-text" id="mt-text"></div>
-    <div class="modal-btns">
-      <button class="mbtn mbtn-ok" onclick="closeTroubleModal()">確認</button>
-    </div>
+    <div class="modal-btns"><button class="mbtn mbtn-ok" onclick="closeTroubleModal()">確認</button></div>
   </div>
 </div>
 
-<!-- ── ルーレットモーダル ── -->
+<!-- ルーレット -->
 <div class="modal-bg hidden" id="modal-roulette">
   <div class="modal" style="border:2px solid #555;">
     <div class="modal-title">🎲 ルーレット</div>
-    <div class="roulette-wheel" id="rl-wheel">🎰</div>
-    <div class="roulette-result" id="rl-result"></div>
+    <div class="rl-wheel" id="rl-wheel">🎰</div>
+    <div class="rl-result" id="rl-result"></div>
     <div class="modal-text" id="rl-detail"></div>
-    <div class="modal-btns">
-      <button class="mbtn mbtn-ok" id="rl-btn" onclick="closeRouletteModal()">確認</button>
-    </div>
+    <div class="modal-btns"><button class="mbtn mbtn-ok" id="rl-ok" onclick="closeRouletteModal()" disabled>確認</button></div>
   </div>
 </div>
 
-<!-- ── 捨て札選択モーダル ── -->
+<!-- 捨て札 -->
 <div class="modal-bg hidden" id="modal-discard">
-  <div class="modal" style="border:2px solid #6b3a3a;">
-    <div class="modal-title" id="disc-title">手札を選んで捨ててください</div>
+  <div class="modal" style="border:2px solid var(--red-b);">
+    <div class="modal-title" id="disc-title">手札を捨ててください</div>
     <div class="discard-grid" id="disc-grid"></div>
-    <div class="modal-btns">
-      <button class="mbtn mbtn-use" id="disc-ok" onclick="confirmDiscard()">決定</button>
-    </div>
+    <div class="modal-btns"><button class="mbtn mbtn-use" id="disc-ok" onclick="confirmDiscard()" disabled>決定</button></div>
   </div>
 </div>
 
-<!-- ── 汎用メッセージ ── -->
-<div class="modal-bg hidden" id="modal-msg">
-  <div class="modal" style="border:2px solid #333;">
-    <div class="modal-title" id="msg-title"></div>
-    <div class="modal-text" id="msg-body"></div>
-    <div class="modal-btns">
-      <button class="mbtn mbtn-ok" id="msg-ok" onclick="closeMsgModal()">OK</button>
-    </div>
+<!-- ケース詳細 -->
+<div class="modal-bg hidden" id="modal-case-detail">
+  <div class="modal" style="border:2px solid var(--red-b);">
+    <div class="modal-title" id="cd-title">—</div>
+    <div class="modal-text"  id="cd-text"></div>
+    <div class="modal-btns"><button class="mbtn mbtn-close" onclick="closeModal('modal-case-detail')">閉じる</button></div>
   </div>
 </div>
 
+<!-- ════════════════════════════════════════
+     GAME LOGIC
+════════════════════════════════════════ -->
 <script>
-// ═══════════════════════════════════════════════════════
-//  UTILITIES
-// ═══════════════════════════════════════════════════════
-const TROUBLE_ICONS = {'指導検査':'⚖️','法改正':'📜','支給漏れ':'💸','所得隠し':'🕵️','業務妨害':'🚧','電波攻撃':'📡','精神不調':'🌀','不景気':'📉','保護費減額':'💔','大災害':'🌊','コロナ禍':'🦠'};
-const TYPE_TRANSFORM_ID = {'通常':1001,'精神':1004,'困難':1019};
-const ID_CARD = {};
-CASE_CARDS.forEach(c => { ID_CARD[c.ID] = c; });
+'use strict';
+// ─────────────────────────────────────────
+// CONSTANTS
+// ─────────────────────────────────────────
+const TROUBLE_ICONS={指導検査:'⚖️',法改正:'📜',支給漏れ:'💸',所得隠し:'🕵️',業務妨害:'🚧',電波攻撃:'📡',精神不調:'🌀',不景気:'📉',保護費減額:'💔',大災害:'🌊',コロナ禍:'🦠'};
+const TYPE_T={通常:1001,精神:1004,困難:1019};
+const TYPE_STYLES={通常:'rgba(76,175,80,.18);color:#81c784',精神:'rgba(156,39,176,.18);color:#ce93d8',困窮:'rgba(255,193,7,.15);color:#ffe082',暴力:'rgba(229,57,53,.18);color:#ef9a9a',困難:'rgba(244,67,54,.25);color:#ff8a65'};
+const ID_CARD={};
+CASE_CARDS.forEach(c=>{ ID_CARD[Number(c.ID)]=c; });
 
-function shuffle(arr) {
-  for (let i=arr.length-1;i>0;i--){const j=0|Math.random()*(i+1);[arr[i],arr[j]]=[arr[j],arr[i]];}
-  return arr;
-}
-function clamp(v,mn,mx){return Math.max(mn,Math.min(mx,v));}
-function signed(n){return n>0?`+${n}`:`${n}`;}
-function getSave(){try{return JSON.parse(localStorage.getItem('cw_save')||'{}')}catch{return {};}}
-function setSave(d){localStorage.setItem('cw_save',JSON.stringify(d));}
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
-}
+// ─────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};
+const clamp=(v,mn,mx)=>Math.max(mn,Math.min(mx,v));
+const signed=n=>n>0?`+${n}`:`${n}`;
+const nn=v=>v!==null&&v!==undefined;
+const getSave=()=>{try{return JSON.parse(localStorage.getItem('cw_save')||'{}')}catch{return{};}};
+const setSave=d=>localStorage.setItem('cw_save',JSON.stringify(d));
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
 function closeModal(id){document.getElementById(id).classList.add('hidden');}
 function openModal(id){document.getElementById(id).classList.remove('hidden');}
 
-// ═══════════════════════════════════════════════════════
-//  MODE SELECT
-// ═══════════════════════════════════════════════════════
-let selectedMode='training', selectedDiff='normal';
+// ─────────────────────────────────────────
+// MODE SELECT
+// ─────────────────────────────────────────
+let selMode='training', selDiff='normal';
 function selectMode(m){
-  selectedMode=m;
+  selMode=m;
   document.getElementById('mc-training').classList.toggle('selected',m==='training');
   document.getElementById('mc-endless').classList.toggle('selected',m==='endless');
 }
 function selectDiff(d){
-  selectedDiff=d;
+  selDiff=d;
   document.getElementById('diff-normal').classList.toggle('selected',d==='normal');
   document.getElementById('diff-hard').classList.toggle('selected',d==='hard');
 }
 
-// ═══════════════════════════════════════════════════════
-//  GAME STATE
-// ═══════════════════════════════════════════════════════
-let G = {};
+// ─────────────────────────────────────────
+// GAME STATE
+// ─────────────────────────────────────────
+let G={};
 
-function buildDeck(cards) {
-  const deck = [];
-  cards.forEach(c => { for(let i=0;i<(c['デッキ枚数']||1);i++) deck.push({...c}); });
+function buildDeck(cards){
+  const deck=[];
+  cards.forEach(c=>{for(let i=0;i<(c['デッキ枚数']||1);i++)deck.push({...c});});
   return shuffle(deck);
 }
-function createCaseState(data) {
-  return {
-    data: {...data},
-    curCoins: data['初期所持金'] ?? 0,
-    curMental: data['初期メンタル'] ?? 0,
-    angerFlags: 0,
-    illegalFlags: 0,
-    meetMk: 0, visitMk: 0, mgmtMk: 0,
-    sickFlag: data['病気フラグ'] ?? 0,
-    indFlag: false,
-    auditTarget: false,
+function mkCase(data){
+  return{
+    data:{...data},
+    curCoins:data['初期所持金']??0,
+    curMental:data['初期メンタル']??0,
+    angerFlags:0,illegalFlags:0,
+    meetMk:0,visitMk:0,mgmtMk:0,
+    sickFlag:data['病気フラグ']??0,
+    indFlag:false,auditTarget:false,
   };
 }
-
-function startGame() {
-  const save = getSave();
-  if (!save.firstPlay) { save.firstPlay = Date.now(); }
-  const key = `${selectedMode}_${selectedDiff}`;
-  save.playCounts = save.playCounts || {};
-  save.playCounts[key] = (save.playCounts[key]||0)+1;
+function startGame(){
+  const save=getSave();
+  if(!save.firstPlay){save.firstPlay=Date.now();}
+  save.playCounts=save.playCounts||{};
+  save.playCounts[`${selMode}_${selDiff}`]=(save.playCounts[`${selMode}_${selDiff}`]||0)+1;
   setSave(save);
 
-  G = {
-    mode: selectedMode, diff: selectedDiff,
-    turn: 0, phase: 'setup',
-    coins: 2, mental: 5, points: 0,
-    hand: [], cases: [],
-    workerDeck: buildDeck(WORKER_CARDS),
-    workerDiscard: [],
-    caseDeck: shuffle([...CASE_CARDS,...CASE_CARDS]),  // 2倍デッキ
-    troubleDeck: buildDeck(TROUBLE_CARDS),
-    troubleDiscard: [],
-    auditFlag: false, guardFlag: false, isSick: false,
-    actionsTotal: 0, actionsLeft: 0,
-    selectedCard: null,
-    log: [],
-    totalPoints: 0,
-    pendingTrouble: null,
-    discardRequired: 0,
-    discardCallback: null,
-    discardSelected: [],
+  G={
+    mode:selMode,diff:selDiff,
+    turn:0,phase:'setup',
+    coins:2,mental:5,points:0,
+    hand:[],cases:[],
+    wDeck:buildDeck(WORKER_CARDS),wDiscard:[],
+    cDeck:shuffle([...CASE_CARDS,...CASE_CARDS]),
+    tDeck:buildDeck(TROUBLE_CARDS),tDiscard:[],
+    auditFlag:false,guardFlag:false,isSick:false,
+    actTotal:0,actLeft:0,
+    selCard:null,
+    log:[],
+    _targets:[],
+    discReq:0,discCb:null,discSel:[],
   };
-
-  // 初期手札
-  for(let i=0;i<5;i++) drawWorker();
-  // 初期ケース
-  for(let i=0;i<2;i++) { const c=G.caseDeck.shift(); if(c) G.cases.push(createCaseState(c)); }
-
-  addLog('ゲームスタート！担当ケース2件、手札5枚');
+  // 初期手札5枚
+  for(let i=0;i<5;i++)drawWorker();
+  // 初期ケース2枚
+  for(let i=0;i<2;i++){const c=G.cDeck.shift();if(c)G.cases.push(mkCase(c));}
+  addLog('ゲームスタート！手札5枚・担当ケース2件');
   showScreen('scn-game');
-  updateSickStatus();
+  updateSick();
   startTurn();
 }
 
-// ═══════════════════════════════════════════════════════
-//  DECK OPERATIONS
-// ═══════════════════════════════════════════════════════
+// ─────────────────────────────────────────
+// DECK OPS
+// ─────────────────────────────────────────
 function drawWorker(n=1){
-  let drew=0;
   for(let i=0;i<n;i++){
-    if(!G.workerDeck.length){
-      if(!G.workerDiscard.length){ addLog('ワーカー山札切れ！','danger'); gameOver('ワーカー山札が切れました'); return; }
-      G.workerDeck = shuffle([...G.workerDiscard]); G.workerDiscard=[];
-      addLog('ワーカー山札をリシャッフル');
+    if(!G.wDeck.length){
+      if(!G.wDiscard.length){addLog('ワーカー山札切れ！','danger');gameOver('ワーカー山札が切れました');return;}
+      G.wDeck=shuffle([...G.wDiscard]);G.wDiscard=[];
+      addLog('ワーカー山札リシャッフル');
     }
-    G.hand.push(G.workerDeck.shift()); drew++;
+    if(G.hand.length<7)G.hand.push(G.wDeck.shift());
+    else G.wDiscard.push(G.wDeck.shift()); // 上限超えは捨て
   }
-  return drew;
 }
 function drawCase(){
-  if(!G.caseDeck.length){ addLog('ケース山札が空のため追加なし'); return null; }
-  const c=G.caseDeck.shift();
-  G.cases.push(createCaseState(c));
-  addLog(`新規ケース追加：${c['カード名']}（${c['種別']}）`,'important');
+  if(!G.cDeck.length){addLog('ケース山札が空');return null;}
+  const c=G.cDeck.shift();
+  G.cases.push(mkCase(c));
+  addLog(`新規ケース「${c['カード名']}」（${c['種別']}）`,'info');
+  updateSick();
   return c;
 }
 function drawTrouble(){
-  if(!G.troubleDeck.length){
-    if(!G.troubleDiscard.length) return null;
-    G.troubleDeck = shuffle([...G.troubleDiscard]); G.troubleDiscard=[];
-    addLog('トラブル山札をリシャッフル');
+  if(!G.tDeck.length){
+    if(!G.tDiscard.length)return null;
+    G.tDeck=shuffle([...G.tDiscard]);G.tDiscard=[];
   }
-  return G.troubleDeck.shift();
+  return G.tDeck.shift();
 }
 
-// ═══════════════════════════════════════════════════════
-//  TURN ENGINE
-// ═══════════════════════════════════════════════════════
+// ─────────────────────────────────────────
+// TURN FLOW
+// ─────────────────────────────────────────
 function startTurn(){
   G.turn++;
-  G.selectedCard=null;
-  addLog(`─── ターン ${G.turn} 開始 ───`,'important');
-
+  G.selCard=null;
+  addLog(`─── ターン ${G.turn} 開始 ───`,'info');
   if(G.turn===1){
-    G.phase='action';
-    startActionPhase();
+    G.phase='action';startActionPhase();
   } else {
-    G.phase='recovery';
     doRecovery();
   }
 }
 function doRecovery(){
-  if(G.isSick){ G.coins+=1; addLog('回復：💰+1（病気中）'); }
-  else { G.coins+=3; G.mental=Math.min(G.mental+1,99); addLog('回復：💰+3 🧠+1'); }
-  G.phase='caseStats';
+  G.phase='recovery';
+  if(G.isSick){G.coins+=1;addLog('回復：💰+1（病気中）');}
+  else{G.coins+=3;G.mental=clamp(G.mental+1,0,99);addLog('回復：💰+3 🧠+1','good');}
   doCaseStats();
 }
 function doCaseStats(){
-  G.cases.forEach((cs,i)=>{
+  G.phase='caseStats';
+  G.cases.forEach(cs=>{
     const d=cs.data;
-    if(d['ターンエンド_所持金変動']){
-      cs.curCoins=Math.max(0,cs.curCoins+(d['ターンエンド_所持金変動']));
-    }
-    if(d['ターンエンド_メンタル変動']){
-      cs.curMental=Math.max(0,cs.curMental+(d['ターンエンド_メンタル変動']));
-    }
-    if(d['収入フラグ']==='収入あり') cs.curCoins++;
-    if(d['プレイヤー所持金変動']){
-      const delta=d['プレイヤー所持金変動'];
-      if(!G.guardFlag||delta>=0){ G.coins=Math.max(0,G.coins+delta); if(delta<0)addLog(`ケース「${d['カード名']}」からPL💰${signed(delta)}`,'danger'); }
-    }
-    if(d['プレイヤーメンタル変動']){
-      const delta=d['プレイヤーメンタル変動'];
-      if(!G.guardFlag||delta>=0){ G.mental=Math.max(0,G.mental+delta); if(delta<0)addLog(`ケース「${d['カード名']}」からPL🧠${signed(delta)}`,'danger'); }
+    if(nn(d['ターンエンド_所持金変動']))cs.curCoins=Math.max(0,cs.curCoins+d['ターンエンド_所持金変動']);
+    if(nn(d['ターンエンド_メンタル変動']))cs.curMental=Math.max(0,cs.curMental+d['ターンエンド_メンタル変動']);
+    if(d['収入フラグ']==='収入あり')cs.curCoins++;
+    if(!G.guardFlag){
+      if(nn(d['プレイヤー所持金変動'])&&d['プレイヤー所持金変動']<0){G.coins=Math.max(0,G.coins+d['プレイヤー所持金変動']);addLog(`ケース「${d['カード名']}」 PL💰${signed(d['プレイヤー所持金変動'])}`,'danger');}
+      if(nn(d['プレイヤーメンタル変動'])&&d['プレイヤーメンタル変動']<0){G.mental=Math.max(0,G.mental+d['プレイヤーメンタル変動']);addLog(`ケース「${d['カード名']}」 PL🧠${signed(d['プレイヤーメンタル変動'])}`,'danger');}
+    } else {
+      // ガード中はマイナスのみ無効
+      if(nn(d['プレイヤー所持金変動'])&&d['プレイヤー所持金変動']>0)G.coins+=d['プレイヤー所持金変動'];
+      if(nn(d['プレイヤーメンタル変動'])&&d['プレイヤーメンタル変動']>0)G.mental+=d['プレイヤーメンタル変動'];
     }
   });
   G.guardFlag=false;
-  if(G.mental<=0){gameOver('ケースの圧力でメンタルが崩壊');return;}
-  updateSickStatus();
-  G.phase='trouble';
-  showTroublePhase();
+  if(G.mental<=0){gameOver('ケース対応でメンタル崩壊');return;}
+  updateSick();
+  showTrouble();
 }
-function showTroublePhase(){
+function showTrouble(){
+  G.phase='trouble';
   const card=drawTrouble();
-  if(!card){G.phase='addCase';doCaseAdd();return;}
-  G.troubleDiscard.push(card);
-  G.pendingTrouble=card;
-  applyTroubleCard(card);
-  // トラブルモーダル表示
+  if(!card){doCaseAdd();return;}
+  G.tDiscard.push(card);
+  applyTrouble(card);
+  if(G.phase==='gameOver')return;
   document.getElementById('mt-icon').textContent=TROUBLE_ICONS[card['カード名']]||'⚠️';
   document.getElementById('mt-name').textContent=card['カード名'];
   document.getElementById('mt-text').textContent=card['効果詳細テキスト']||'';
@@ -641,255 +718,201 @@ function showTroublePhase(){
 }
 function closeTroubleModal(){
   closeModal('modal-trouble');
-  if(G.mental<=0){gameOver('トラブルによるメンタル崩壊');return;}
-  if(G.phase==='trouble2'){
-    G.phase='addCase';doCaseAdd();return;
-  }
-  G.phase='addCase';
+  if(G.phase==='gameOver')return;
   doCaseAdd();
 }
 function doCaseAdd(){
-  let add=false;
-  if(G.diff==='hard'){ add=true; }
-  else { if(G.turn>=3&&G.turn%2===1) add=true; }
-  if(add) drawCase();
-  G.phase='action';
+  G.phase='addCase';
+  let add=G.diff==='hard'||(G.turn>=3&&G.turn%2===1);
+  if(add)drawCase();
   startActionPhase();
 }
 function startActionPhase(){
-  drawWorker();
-  checkHandLimit();
-  G.actionsTotal = Math.max(1, G.cases.length-1);
-  G.actionsLeft = G.actionsTotal;
   G.phase='action';
+  // ▼ 毎ターン2枚ドロー
+  drawWorker(2);
+  checkHandLimit();
+  // ▼ 行動数 = ケース数 + 1
+  G.actTotal=G.cases.length+1;
+  G.actLeft=G.actTotal;
   render();
-  updatePhaseBar();
 }
 function endPlayerTurn(){
-  if(G.selectedCard!==null){cancelSelect();}
+  if(G.phase!=='action')return;
+  G.selCard=null;
   G.phase='turnEnd';
   runTurnEnd();
 }
 
-// ═══════════════════════════════════════════════════════
-//  TURN END PROCESSING
-// ═══════════════════════════════════════════════════════
+// ─────────────────────────────────────────
+// TURN END ①〜⑦
+// ─────────────────────────────────────────
 function runTurnEnd(){
-  addLog('── ターンエンド処理 ──');
-  step1_illegalCheck();
-  step2_illegalPenalty();
-  if(G.mental<=0){gameOver('不正フラグペナルティでメンタル崩壊');return;}
-  step3_angerCheck();
-  step4_independenceCheck();
-  if(checkWin()) return;
-  step5_auditCheck();
-  step6_mentalChange();
-  showRoulette();
-}
-function step1_illegalCheck(){
+  addLog('── ターンエンド ──');
+  // ①不正フラグ加算
   G.cases.forEach(cs=>{
     const d=cs.data;
     const ic=d['ターンエンド_不正フラグ加算条件_所持金'];
     const im=d['ターンエンド_不正フラグ加算条件_メンタル'];
-    const cond1=(ic===null||ic===undefined)||cs.curCoins<=ic;
-    const cond2=(im===null||im===undefined)||cs.curMental<=im;
-    if(cond1&&cond2&&(ic!==null&&ic!==undefined||im!==null&&im!==undefined)){
+    const ok1=!nn(ic)||cs.curCoins<=ic;
+    const ok2=!nn(im)||cs.curMental<=im;
+    if(ok1&&ok2&&(nn(ic)||nn(im))){
       cs.illegalFlags++;
-      addLog(`「${d['カード名']}」不正フラグ追加→計${cs.illegalFlags}`,'danger');
+      addLog(`「${d['カード名']}」不正+1→${cs.illegalFlags}`,'danger');
     }
   });
-}
-function step2_illegalPenalty(){
-  const total=G.cases.reduce((s,cs)=>s+cs.illegalFlags,0);
-  if(total>0){
-    G.coins=Math.max(0,G.coins-total);
-    addLog(`不正フラグ合計${total}：PL💰-${total}`,'danger');
+  // ②不正ペナルティ
+  const totIll=G.cases.reduce((s,cs)=>s+cs.illegalFlags,0);
+  if(totIll>0){G.coins=Math.max(0,G.coins-totIll);addLog(`不正合計${totIll}：PL💰-${totIll}`,'danger');}
+  // ③怒りフラグ3→困難変化
+  for(let i=G.cases.length-1;i>=0;i--){
+    if(G.cases[i].angerFlags>=3){addLog(`「${G.cases[i].data['カード名']}」怒り3→困難変化！`,'danger');transformCase(i,1019);}
   }
-}
-function step3_angerCheck(){
-  const toTransform=[];
-  G.cases.forEach((cs,i)=>{ if(cs.angerFlags>=3) toTransform.push(i); });
-  toTransform.reverse().forEach(i=>{
-    addLog(`「${G.cases[i].data['カード名']}」怒りフラグ3→対応困難ケースに変化！`,'danger');
-    transformCase(i,1019);
-  });
-}
-function step4_independenceCheck(){
-  const resolved=[];
-  G.cases.forEach((cs,i)=>{
-    if(cs.curCoins>=5||cs.indFlag) resolved.push(i);
-  });
-  resolved.reverse().forEach(i=>resolveCase(i,'independence'));
-}
-function step5_auditCheck(){
-  if(!G.auditFlag) return;
-  const hasIllegal=G.cases.some(cs=>cs.illegalFlags>0);
-  if(hasIllegal){
-    addLog('監査：不正ケース残存！ゲームオーバー','danger');
-    gameOver('監査で不正ケースが発覚しました');
-    return;
+  // ④自立判定
+  for(let i=G.cases.length-1;i>=0;i--){
+    if(G.cases[i].curCoins>=5||G.cases[i].indFlag)resolveCase(i,'independence');
   }
-  G.auditFlag=false;
-  addLog('監査クリア！監査フラグ解除','good');
+  if(checkWin())return;
+  // ⑤監査判定
+  if(G.auditFlag){
+    const hasIll=G.cases.some(cs=>cs.illegalFlags>0);
+    if(hasIll){addLog('監査：不正残存→ゲームオーバー','danger');gameOver('監査で不正ケースが発覚');return;}
+    G.auditFlag=false;addLog('監査クリア','good');
+  }
+  // ⑥精神変化
+  for(let i=G.cases.length-1;i>=0;i--){
+    if(G.cases[i].curMental<=0&&G.cases[i].data['種別']!=='精神'){addLog(`「${G.cases[i].data['カード名']}」🧠0→精神変化`,'danger');transformCase(i,1004);}
+  }
+  // ⑦ルーレット
+  showRoulette();
 }
-function step6_mentalChange(){
-  const toChange=[];
-  G.cases.forEach((cs,i)=>{ if(cs.curMental<=0) toChange.push(i); });
-  toChange.reverse().forEach(i=>{
-    if(G.cases[i].data['種別']==='精神') return; // 既に精神
-    addLog(`「${G.cases[i].data['カード名']}」🧠0→精神ケースに変化`,'danger');
-    transformCase(i,1004);
-  });
-}
+
+// ─────────────────────────────────────────
+// ROULETTE
+// ─────────────────────────────────────────
 function showRoulette(){
-  const outcomes=[
-    {label:'何もなし',icon:'😌',detail:'何も起きなかった。'},
-    {label:'困窮ケース判定',icon:'💸',detail:''},
-    {label:'精神ケース判定',icon:'😰',detail:''},
-    {label:'暴力ケース判定',icon:'👊',detail:''},
-    {label:'トラブル追加',icon:'⚡',detail:'追加トラブルカードが発動！'},
+  const opts=[
+    {label:'何もなし',icon:'😌',fn:()=>({detail:'何も起きなかった。'})},
+    {label:'困窮ケース判定',icon:'💸',fn:()=>{
+      const d=[];
+      for(let i=G.cases.length-1;i>=0;i--){
+        const cs=G.cases[i];
+        if(cs.data['種別']!=='困窮')continue;
+        if(cs.curCoins<=0){d.push(`「${cs.data['カード名']}」💰0→死亡`);resolveCase(i,'death');}
+        else if(cs.curMental<=0){d.push(`「${cs.data['カード名']}」🧠0→失踪`);resolveCase(i,'missing');}
+      }
+      return{detail:d.join('\n')||'該当ケースなし'};
+    }},
+    {label:'精神ケース判定',icon:'😰',fn:()=>{
+      const d=[];
+      for(let i=G.cases.length-1;i>=0;i--){
+        const cs=G.cases[i];
+        if(cs.data['種別']!=='精神')continue;
+        if(cs.curCoins<=0){d.push(`「${cs.data['カード名']}」💰0→失踪`);resolveCase(i,'missing');}
+        else if(cs.curMental<=0){cs.angerFlags++;d.push(`「${cs.data['カード名']}」🧠0→怒り+1`);}
+      }
+      return{detail:d.join('\n')||'該当ケースなし'};
+    }},
+    {label:'暴力ケース判定',icon:'👊',fn:()=>{
+      const d=[];
+      G.cases.forEach(cs=>{
+        if(cs.data['種別']!=='暴力')return;
+        if(cs.curCoins<=0||cs.curMental<=0){cs.angerFlags++;d.push(`「${cs.data['カード名']}」→怒り+1`);}
+      });
+      return{detail:d.join('\n')||'該当ケースなし'};
+    }},
+    {label:'トラブル追加',icon:'⚡',fn:()=>{
+      const ex=drawTrouble();
+      if(ex){G.tDiscard.push(ex);applyTrouble(ex);return{detail:`「${ex['カード名']}」が追加発動！\n${ex['効果詳細テキスト']||''}`};}
+      return{detail:'トラブル山札が空でした'};
+    }},
   ];
   const roll=0|Math.random()*5;
-  const chosen=outcomes[roll];
-  const details=[];
-
-  if(roll===1){
-    G.cases.forEach((cs,i)=>{
-      if(cs.data['種別']==='困窮'){
-        if(cs.curCoins<=0){details.push(`「${cs.data['カード名']}」💰0→死亡 PL🧠-1 PT-1`);resolveCase(i,'death');}
-        else if(cs.curMental<=0){details.push(`「${cs.data['カード名']}」🧠0→失踪 PL💰-1`);resolveCase(i,'missing');}
-      }
-    });
-    chosen.detail=details.join('\n')||'該当ケースなし。';
-  } else if(roll===2){
-    G.cases.forEach((cs,i)=>{
-      if(cs.data['種別']==='精神'){
-        if(cs.curCoins<=0){details.push(`「${cs.data['カード名']}」💰0→失踪 PL💰-1`);resolveCase(i,'missing');}
-        else if(cs.curMental<=0){cs.angerFlags++;details.push(`「${cs.data['カード名']}」🧠0→怒り+1`);}
-      }
-    });
-    chosen.detail=details.join('\n')||'該当ケースなし。';
-  } else if(roll===3){
-    G.cases.forEach((cs,i)=>{
-      if(cs.data['種別']==='暴力'){
-        if(cs.curCoins<=0||cs.curMental<=0){cs.angerFlags++;details.push(`「${cs.data['カード名']}」→怒り+1`);}
-      }
-    });
-    chosen.detail=details.join('\n')||'該当ケースなし。';
-  } else if(roll===4){
-    const extra=drawTrouble();
-    if(extra){
-      G.troubleDiscard.push(extra);
-      chosen.detail=`「${extra['カード名']}」が追加発動！\n${extra['効果詳細テキスト']||''}`;
-      applyTroubleCard(extra);
-    }
-  }
-
-  // アニメーション
-  const wheel=document.getElementById('rl-wheel');
-  const icons=['😌','💸','😰','👊','⚡'];
-  let count=0;
+  const chosen=opts[roll];
   openModal('modal-roulette');
   document.getElementById('rl-result').textContent='';
   document.getElementById('rl-detail').textContent='';
-  document.getElementById('rl-btn').disabled=true;
+  document.getElementById('rl-ok').disabled=true;
+  const icons=['😌','💸','😰','👊','⚡'];
+  let cnt=0;
   const timer=setInterval(()=>{
-    wheel.textContent=icons[count++%5];
-    if(count>15){
+    document.getElementById('rl-wheel').textContent=icons[cnt++%5];
+    if(cnt>16){
       clearInterval(timer);
-      wheel.textContent=chosen.icon;
+      document.getElementById('rl-wheel').textContent=chosen.icon;
       document.getElementById('rl-result').textContent=chosen.label;
-      document.getElementById('rl-detail').textContent=chosen.detail;
-      document.getElementById('rl-btn').disabled=false;
+      const res=chosen.fn();
+      document.getElementById('rl-detail').textContent=res.detail;
+      document.getElementById('rl-ok').disabled=false;
+      addLog(`ルーレット：${chosen.label}`);
     }
-  },80);
-  addLog(`ルーレット：${chosen.label}`);
+  },75);
 }
 function closeRouletteModal(){
   closeModal('modal-roulette');
-  if(G.phase==='gameOver') return;
+  if(G.phase==='gameOver')return;
   if(G.mental<=0){gameOver('メンタル崩壊');return;}
-  checkWin();
-  if(G.phase!=='gameOver'&&G.phase!=='win') startTurn();
+  if(!checkWin())startTurn();
   render();
 }
 
-// ═══════════════════════════════════════════════════════
-//  CASE MANAGEMENT
-// ═══════════════════════════════════════════════════════
+// ─────────────────────────────────────────
+// CASE MANAGEMENT
+// ─────────────────────────────────────────
 function transformCase(idx,newId){
-  if(idx<0||idx>=G.cases.length) return;
-  const template=ID_CARD[newId];
-  if(!template){addLog(`変化先ID${newId}が見つかりません`,'danger');return;}
+  if(idx<0||idx>=G.cases.length)return;
+  const tmpl=ID_CARD[newId];
+  if(!tmpl){addLog(`変化先ID${newId}が見つかりません`,'danger');return;}
   const old=G.cases[idx];
-  const newCs=createCaseState(template);
-  // 引き継ぎ
-  newCs.curCoins=old.curCoins;
-  newCs.curMental=old.curMental;
-  newCs.angerFlags=old.angerFlags;
-  newCs.illegalFlags=old.illegalFlags;
-  // マーカーリセット（精神逆戻りのみ通院半減維持）
-  if(newId===1004 && old.data['種別']==='精神'){
-    newCs.visitMk=Math.floor(old.visitMk/2);
-  }
-  G.cases[idx]=newCs;
+  const ncs=mkCase(tmpl);
+  ncs.curCoins=old.curCoins;ncs.curMental=old.curMental;
+  ncs.angerFlags=old.angerFlags;ncs.illegalFlags=old.illegalFlags;
+  if(newId===1004&&old.data['種別']==='精神')ncs.visitMk=Math.floor(old.visitMk/2);
+  G.cases[idx]=ncs;
+  updateSick();
 }
 function resolveCase(idx,reason){
-  if(idx<0||idx>=G.cases.length) return;
+  if(idx<0||idx>=G.cases.length)return;
   const cs=G.cases[idx];
   const name=cs.data['カード名'];
-  const pt=cs.data['獲得ポイント']||1;
   if(reason==='independence'){
-    const bonus = cs.data['種別']==='困難' ? 2 : 1;
-    G.points+=bonus; G.totalPoints+=bonus;
-    addLog(`「${name}」自立廃止！ +${bonus}pt（累計${G.points}pt）`,'good');
+    const pt=cs.data['種別']==='困難'?2:1;
+    G.points+=pt;addLog(`「${name}」自立廃止 +${pt}pt（計${G.points}pt）`,'good');
   } else if(reason==='death'){
-    G.points=Math.max(0,G.points-1);
-    G.mental=Math.max(1,G.mental-1);
-    addLog(`「${name}」死亡 PL🧠-1 PT-1`,'danger');
+    G.points=Math.max(0,G.points-1);G.mental=Math.max(1,G.mental-1);
+    addLog(`「${name}」死亡 PT-1 PL🧠-1`,'danger');
   } else if(reason==='missing'){
-    G.coins=Math.max(0,G.coins-1);
-    addLog(`「${name}」失踪 PL💰-1`,'danger');
-  } else if(reason==='transfer'){
-    addLog(`「${name}」移管（ソロモード：除外）`);
+    G.coins=Math.max(0,G.coins-1);addLog(`「${name}」失踪 PL💰-1`,'danger');
+  } else {
+    addLog(`「${name}」${reason}`);
   }
-  G.cases.splice(idx,1);
-  updateSickStatus();
+  G.cases.splice(idx,1);updateSick();
 }
-function updateSickStatus(){
-  const totalSick=G.cases.reduce((s,cs)=>s+cs.sickFlag,0);
-  G.isSick=totalSick>=2;
-}
-function checkMarkerThresholds(idx){
-  if(idx<0||idx>=G.cases.length) return;
-  const cs=G.cases[idx];
-  const type=cs.data['種別'];
+function checkMarkers(idx){
+  if(idx<0||idx>=G.cases.length)return;
+  const cs=G.cases[idx];const type=cs.data['種別'];
   if(type==='困窮'&&cs.mgmtMk>=2){
-    addLog(`「${cs.data['カード名']}」管理マーカー2→通常ケースに変化`,'good');
-    const t=transformCase(idx,1001);
-    const tc=G.cases[idx]; if(tc){tc.curCoins+=1; addLog('変化ボーナス💰+1','good');}
-    return;
+    addLog(`「${cs.data['カード名']}」管理×2→通常変化`,'good');
+    transformCase(idx,1001);const tc=G.cases[idx];if(tc){tc.curCoins+=1;}return;
   }
   if(type==='精神'&&cs.visitMk>=2){
-    addLog(`「${cs.data['カード名']}」通院マーカー2→通常ケースに変化`,'good');
-    transformCase(idx,1001);
-    const tc=G.cases[idx]; if(tc){tc.curMental+=2; addLog('変化ボーナス🧠+2','good');}
-    return;
+    addLog(`「${cs.data['カード名']}」通院×2→通常変化`,'good');
+    transformCase(idx,1001);const tc=G.cases[idx];if(tc){tc.curMental+=2;}return;
   }
   if(type==='暴力'&&cs.meetMk>=2){
-    addLog(`「${cs.data['カード名']}」面談マーカー2→通常ケースに変化`,'good');
-    transformCase(idx,1001);
-    const tc=G.cases[idx]; if(tc){tc.curMental+=1; addLog('変化ボーナス🧠+1','good');}
-    return;
+    addLog(`「${cs.data['カード名']}」面談×2→通常変化`,'good');
+    transformCase(idx,1001);const tc=G.cases[idx];if(tc){tc.curMental+=1;}return;
   }
 }
+function updateSick(){
+  G.isSick=G.cases.reduce((s,cs)=>s+cs.sickFlag,0)>=2;
+}
 
-// ═══════════════════════════════════════════════════════
-//  TROUBLE CARD APPLICATION
-// ═══════════════════════════════════════════════════════
-function applyTroubleCard(card){
-  const name=card['カード名'];
-  addLog(`トラブル：「${name}」発動`,'danger');
+// ─────────────────────────────────────────
+// TROUBLE APPLICATION
+// ─────────────────────────────────────────
+function applyTrouble(card){
+  addLog(`トラブル「${card['カード名']}」発動`,'danger');
   const pm=card['プレイヤーメンタル変動']||0;
   const pw=card['プレイヤー所持金変動']||0;
   const ph=card['プレイヤー手札強制捨て枚数']||0;
@@ -899,461 +922,436 @@ function applyTroubleCard(card){
   const ca=card['ケース怒りフラグ加算']||0;
   const cf=card['ケース不正フラグ加算']||0;
   const csick=card['病気フラグ変動']||0;
-  const newCases=card['新規ケース追加枚数']||0;
-  const targetType=card['対象ケース種別'];
-  const targetFlag=card['対象フラグ種別'];
+  const newC=card['新規ケース追加枚数']||0;
+  const ttype=card['対象ケース種別'];
+  const tflag=card['対象フラグ種別'];
   const multi=card['乗算フラグ'];
   const auditF=card['監査フラグ付与'];
 
   // プレイヤー影響
-  if(pm){
-    if(pm<0&&auditF){ // 指導検査：不正ケースある場合のみ
+  if(pm!==0){
+    if(auditF){
       const hasIll=G.cases.some(cs=>cs.illegalFlags>0);
       if(hasIll){
         G.mental=Math.max(1,G.mental+pm);
         G.auditFlag=true;
-        addLog(`監査：不正ケースあり PL🧠${signed(pm)}（最低1）監査フラグ付与`,'danger');
-      } else {
-        addLog('監査：不正ケースなし。影響なし','good');
-      }
-    } else if(!auditF){
-      const cnt=multi ? G.cases.filter(cs=>!targetType||cs.data['種別']===targetType).length : 1;
+        addLog(`監査：不正あり PL🧠${signed(pm)}（最低1）監査フラグ付与`,'danger');
+      } else addLog('監査：不正なし 影響なし','good');
+    } else {
+      const cnt=multi?G.cases.filter(cs=>!ttype||cs.data['種別']===ttype).length:1;
       G.mental=Math.max(0,G.mental+pm*cnt);
-      if(pm<0) addLog(`PL🧠${signed(pm*cnt)}`,'danger');
+      if(pm<0)addLog(`PL🧠${signed(pm*cnt)}`,'danger');
     }
   }
-  if(pw&&!auditF){
-    const cnt=multi ? G.cases.length : 1;
-    G.coins=Math.max(0,G.coins+pw*cnt);
-    if(pw<0) addLog(`PL💰${signed(pw*cnt)}`,'danger');
-  }
+  if(pw!==0&&!auditF){const cnt=multi?G.cases.length:1;G.coins=Math.max(0,G.coins+pw*cnt);if(pw<0)addLog(`PL💰${signed(pw*cnt)}`,'danger');}
   if(ph>0){
-    if(G.hand.length<=ph){G.workerDiscard.push(...G.hand);G.hand=[];addLog(`手札全捨て（${ph}枚要求）`);}
-    else {
-      // 強制捨て（先頭からランダム）
-      const idxs=shuffle([...Array(G.hand.length).keys()]).slice(0,ph);
-      idxs.sort((a,b)=>b-a).forEach(i=>G.workerDiscard.push(...G.hand.splice(i,1)));
-      addLog(`手札${ph}枚捨て`);
-    }
+    const n=Math.min(ph,G.hand.length);
+    if(n>0){const idxs=shuffle([...Array(G.hand.length).keys()]).slice(0,n);idxs.sort((a,b)=>b-a).forEach(i=>G.wDiscard.push(...G.hand.splice(i,1)));addLog(`手札${n}枚捨て`);}
   }
-  if(pd>0){ drawWorker(pd); addLog(`${pd}枚ドロー`,'good'); }
-
+  if(pd>0){drawWorker(pd);addLog(`${pd}枚ドロー`,'good');}
   // ケース影響
-  const caseFilter=cs=>{
-    let ok=true;
-    if(targetType&&targetType!=='全て') ok=ok&&cs.data['種別']===targetType;
-    if(targetFlag==='不正') ok=ok&&cs.illegalFlags>0;
-    return ok;
+  const filt=cs=>{
+    if(ttype&&ttype!=='全て'&&cs.data['種別']!==ttype)return false;
+    if(tflag==='不正'&&cs.illegalFlags<=0)return false;
+    return true;
   };
   G.cases.forEach(cs=>{
-    if(!caseFilter(cs)) return;
-    if(cm){ cs.curMental=Math.max(0,cs.curMental+cm); }
-    if(cw){ cs.curCoins=Math.max(0,cs.curCoins+cw); }
-    if(ca){ cs.angerFlags+=ca; }
-    if(cf){ cs.illegalFlags+=cf; }
-    if(csick){ cs.sickFlag=Math.max(0,cs.sickFlag+csick); }
+    if(!filt(cs))return;
+    if(cm)cs.curMental=Math.max(0,cs.curMental+cm);
+    if(cw)cs.curCoins=Math.max(0,cs.curCoins+cw);
+    if(ca)cs.angerFlags+=ca;
+    if(cf)cs.illegalFlags+=cf;
+    if(csick)cs.sickFlag=Math.max(0,cs.sickFlag+csick);
   });
-  if(newCases>0){ for(let i=0;i<newCases;i++) drawCase(); }
-  if(pm<0&&!auditF) {/* mental already applied above */}
-  updateSickStatus();
-  if(G.mental<=0){G.phase='gameOver';}
-  checkHandLimit();
+  if(newC>0)for(let i=0;i<newC;i++)drawCase();
+  updateSick();
+  if(G.mental<=0)G.phase='gameOver';
+  render();
 }
 
-// ═══════════════════════════════════════════════════════
-//  WORKER CARD PLAY
-// ═══════════════════════════════════════════════════════
-function checkConditions(card, cs){
-  if(!cs) return card['対象範囲']==='自分'||card['対象範囲']==='ワーカー単体'||card['対象範囲']==='ワーカー全員';
-  const t=card['使用条件_ケース種別'];
-  if(t && cs.data['種別']!==t) return false;
+// ─────────────────────────────────────────
+// WORKER CARD PLAY
+// ─────────────────────────────────────────
+function canAfford(card){
+  const cost=card['プレイヤー所持金変動']||0;return cost>=0||G.coins>=Math.abs(cost);
+}
+function checkCond(card,cs){
+  if(!cs)return true;
+  const t=card['使用条件_ケース種別'];if(t&&cs.data['種別']!==t)return false;
   const fl=card['使用条件_フラグ'];
-  if(fl==='不正'&&cs.illegalFlags<=0) return false;
-  if(fl==='収入あり'&&cs.data['収入フラグ']!=='収入あり') return false;
-  if(fl==='収入なし'&&cs.data['収入フラグ']==='収入あり') return false;
-  const cpl=card['使用条件_ケース所持下限'];
-  if(cpl!==null&&cpl!==undefined&&cs.curCoins<cpl) return false;
-  const cpu=card['使用条件_ケース所持上限'];
-  if(cpu!==null&&cpu!==undefined&&cs.curCoins>cpu) return false;
-  const cml=card['使用条件_ケースメンタル下限'];
-  if(cml!==null&&cml!==undefined&&cs.curMental<cml) return false;
-  const cmu=card['使用条件_ケースメンタル上限'];
-  if(cmu!==null&&cmu!==undefined&&cs.curMental>cmu) return false;
-  // 特定カード追加条件
-  if(card['ID']===2210 && cs.data['種別']!=='困難') return false; // 指示義務違反廃止は困難のみ
+  if(fl==='不正'&&cs.illegalFlags<=0)return false;
+  if(nn(card['使用条件_ケース所持下限'])&&cs.curCoins<card['使用条件_ケース所持下限'])return false;
+  if(nn(card['使用条件_ケース所持上限'])&&cs.curCoins>card['使用条件_ケース所持上限'])return false;
+  if(nn(card['使用条件_ケースメンタル下限'])&&cs.curMental<card['使用条件_ケースメンタル下限'])return false;
+  if(nn(card['使用条件_ケースメンタル上限'])&&cs.curMental>card['使用条件_ケースメンタル上限'])return false;
+  if(Number(card['ID'])===2210&&cs.data['種別']!=='困難')return false;
   return true;
 }
-
-function getValidTargets(card){
-  const range=card['対象範囲'];
-  const targets=[];
-  if(range==='自分'||range==='ワーカー単体'||range==='ワーカー全員'){
-    targets.push({type:'player',label:'自分（CW）'});
-    return targets;
-  }
+function getTargets(card){
+  const range=card['対象範囲'];const tgts=[];
+  if(['自分','ワーカー単体','ワーカー全員'].includes(range)){tgts.push({type:'player',label:'自分（CW）'});return tgts;}
   if(range==='担当ケース単体'||range==='ケース単体'){
-    G.cases.forEach((cs,i)=>{
-      if(checkConditions(card,cs)) targets.push({type:'case',idx:i,label:cs.data['カード名'],cs});
-    });
-    return targets;
+    G.cases.forEach((cs,i)=>{if(checkCond(card,cs))tgts.push({type:'case',idx:i,label:cs.data['カード名'],cs});});
+    return tgts;
   }
-  if(range==='担当ケース全員'||range==='ケース全員'){
-    targets.push({type:'all-cases',label:'全担当ケース'});
-    return targets;
-  }
-  return targets;
+  if(range==='担当ケース全員'||range==='ケース全員'){tgts.push({type:'all',label:'全担当ケース'});return tgts;}
+  return tgts;
 }
+function hasAnyTarget(card){return getTargets(card).length>0;}
 
-function canAfford(card){
-  const cost=card['プレイヤー所持金変動']||0;
-  return cost>=0 || G.coins>=Math.abs(cost);
-}
-
-function onClickWorkerCard(handIdx){
-  if(G.phase!=='action'||G.actionsLeft<=0) return;
-  const card=G.hand[handIdx];
+function onClickWorker(hi){
+  if(G.phase!=='action'||G.actLeft<=0)return;
+  const card=G.hand[hi];
   if(!canAfford(card)){addLog('💰が足りません','danger');return;}
-  G.selectedCard=handIdx;
-  const targets=getValidTargets(card);
-  if(!targets.length){addLog('対象ケースが条件を満たしていません');G.selectedCard=null;return;}
+  const tgts=getTargets(card);
+  if(!tgts.length){addLog('使用条件を満たすケースがありません','danger');return;}
+  G.selCard=hi;G._targets=tgts;
 
-  // モーダルで対象選択
-  document.getElementById('mc-name').textContent=card['カード名'];
-  document.getElementById('mc-detail').textContent=card['効果詳細テキスト']||'';
-  const tList=document.getElementById('mc-targets');
-  if(targets.length===1 && (targets[0].type==='player'||targets[0].type==='all-cases')){
-    tList.innerHTML='';
-    openModal('modal-card');
-    // 自動選択ボタン
-    const btn=document.createElement('button');
-    btn.className='mbtn mbtn-use';
-    btn.textContent='使用する';
-    btn.onclick=()=>{ closeModal('modal-card'); executeCard(handIdx,targets[0]); };
-    document.querySelector('#modal-card .modal-btns').prepend(btn);
+  // モーダル表示
+  document.getElementById('mc-title').textContent=card['カード名'];
+  document.getElementById('mc-detail').textContent=card['効果詳細テキスト']||'（効果詳細なし）';
+
+  const tDiv=document.getElementById('mc-targets');
+  const btnDiv=document.getElementById('mc-btns');
+
+  if(tgts.length===1&&(tgts[0].type==='player'||tgts[0].type==='all')){
+    tDiv.innerHTML='';
+    btnDiv.innerHTML=`<button class="mbtn mbtn-use" onclick="doUse(${hi},0)">使用する</button><button class="mbtn mbtn-cancel" onclick="closeModal('modal-card');cancelSelect()">やめる</button>`;
   } else {
-    tList.innerHTML='<div style="font-size:.72rem;color:#666;margin-bottom:6px;">対象を選択</div><div class="target-list">'+
-      targets.map((t,ti)=>`<div class="target-item" onclick="selectTarget(${handIdx},${ti})">
-        <span class="target-item-name">${t.label}</span>
-        <span class="target-item-stats">${t.cs?`💰${t.cs.curCoins} 🧠${t.cs.curMental}`:''}</span>
+    tDiv.innerHTML='<div style="font-size:.7rem;color:#666;margin-bottom:6px;">対象を選択</div><div class="target-list">'+
+      tgts.map((t,ti)=>`<div class="target-item" onclick="doUse(${hi},${ti})">
+        <span class="ti-name">${t.label}</span>
+        <span class="ti-stats">${t.cs?`💰${t.cs.curCoins} 🧠${t.cs.curMental}`:''}</span>
       </div>`).join('')+'</div>';
-    G._currentTargets=targets;
-    openModal('modal-card');
+    btnDiv.innerHTML=`<button class="mbtn mbtn-cancel" onclick="closeModal('modal-card');cancelSelect()">やめる</button>`;
   }
+  openModal('modal-card');
   render();
 }
-
-let _currentTargets=[];
-function selectTarget(handIdx, tIdx){
+function doUse(hi,ti){
   closeModal('modal-card');
-  const targets=G._currentTargets||[];
-  if(tIdx<0||tIdx>=targets.length) return;
-  executeCard(handIdx, targets[tIdx]);
-}
-function executeCard(handIdx, target){
-  const card=G.hand[handIdx];
-  // コスト適用
-  if(card['プレイヤー所持金変動']){ G.coins=Math.max(0,G.coins+(card['プレイヤー所持金変動']||0)); }
-  if(card['プレイヤーメンタル変動']){ G.mental=Math.max(0,G.mental+(card['プレイヤーメンタル変動']||0)); }
-
-  if(target.type==='player'){
-    applyPlayerEffect(card);
-  } else if(target.type==='all-cases'){
-    G.cases.forEach((_,i)=>applyCaseEffect(card,i));
-  } else if(target.type==='case'){
-    applyCaseEffect(card, target.idx);
-  }
-
-  // ドロー・捨て札
-  if(card['ドロー数']) drawWorker(card['ドロー数']);
-  if(card['プレイヤーガードフラグ']) G.guardFlag=true;
-  const discard=card['捨て札数']||0;
-
+  const card=G.hand[hi];const tgt=G._targets[ti];
+  if(!tgt)return;
+  // コスト
+  const pw=card['プレイヤー所持金変動']||0,pm=card['プレイヤーメンタル変動']||0;
+  G.coins=Math.max(0,G.coins+pw);G.mental=Math.max(0,G.mental+pm);
+  // 効果
+  if(tgt.type==='player')applyPL(card);
+  else if(tgt.type==='all')G.cases.forEach((_,i)=>applyCase(card,i));
+  else applyCase(card,tgt.idx);
+  // ドロー・ガード
+  if(card['ドロー数'])drawWorker(card['ドロー数']);
+  if(card['プレイヤーガードフラグ'])G.guardFlag=true;
+  const disc=card['捨て札数']||0;
   // 消費
-  G.workerDiscard.push(G.hand.splice(handIdx,1)[0]);
-  G.actionsLeft--;
-  G.selectedCard=null;
-  addLog(`「${card['カード名']}」使用（残行動${G.actionsLeft}）`,'good');
-
-  if(discard>0&&G.hand.length>0){ triggerDiscard(discard); return; }
+  G.wDiscard.push(G.hand.splice(hi,1)[0]);
+  G.actLeft--;G.selCard=null;
+  addLog(`「${card['カード名']}」使用（残行動${G.actLeft}）`,'good');
+  if(disc>0&&G.hand.length>0){triggerDiscard(disc);return;}
   checkHandLimit();
-  if(G.mental<=0){gameOver('カード使用でメンタル崩壊');return;}
+  if(G.mental<=0){gameOver('メンタル崩壊');return;}
   render();
 }
-function applyPlayerEffect(card){
-  // 自分・ワーカー対象カード（コスト以外の効果）
-  if(card['ターゲットメンタル変動']){ G.mental=Math.max(0,G.mental+(card['ターゲットメンタル変動']||0)); addLog(`PL🧠${signed(card['ターゲットメンタル変動']||0)}`,'good'); }
-  if(card['ターゲット所持金変動']){ G.coins=Math.max(0,G.coins+(card['ターゲット所持金変動']||0)); addLog(`PL💰${signed(card['ターゲット所持金変動']||0)}`,'good'); }
+function applyPL(card){
+  if(nn(card['ターゲット所持金変動']))G.coins=Math.max(0,G.coins+card['ターゲット所持金変動']);
+  if(nn(card['ターゲットメンタル変動']))G.mental=Math.max(0,G.mental+card['ターゲットメンタル変動']);
 }
-function applyCaseEffect(card,idx){
-  if(idx<0||idx>=G.cases.length) return;
+function applyCase(card,idx){
+  if(idx<0||idx>=G.cases.length)return;
   const cs=G.cases[idx];
-  if(!checkConditions(card,cs)) return;
-  const tw=card['ターゲット所持金変動'], tm=card['ターゲットメンタル変動'];
-  if(tw!==null&&tw!==undefined){ cs.curCoins=Math.max(0,cs.curCoins+tw); }
-  if(tm!==null&&tm!==undefined){ cs.curMental=Math.max(0,cs.curMental+tm); }
-  if(card['面談加算'])  cs.meetMk=Math.max(0,cs.meetMk+card['面談加算']);
-  if(card['通院加算'])  cs.visitMk=Math.max(0,cs.visitMk+card['通院加算']);
-  if(card['管理加算'])  cs.mgmtMk=Math.max(0,cs.mgmtMk+card['管理加算']);
-  if(card['怒りフラグ']!==null&&card['怒りフラグ']!==undefined) cs.angerFlags=Math.max(0,cs.angerFlags+card['怒りフラグ']);
-  if(card['不正フラグ']!==null&&card['不正フラグ']!==undefined) cs.illegalFlags=Math.max(0,cs.illegalFlags+card['不正フラグ']);
-  if(card['自立フラグ']){ cs.indFlag=true; addLog(`「${cs.data['カード名']}」自立フラグON`,'good'); }
-  if(card['移管フラグ']){ resolveCase(idx,'transfer'); updateSickStatus(); render(); return; }
-  if(card['病気フラグ']!==null&&card['病気フラグ']!==undefined){ cs.sickFlag=Math.max(0,cs.sickFlag+card['病気フラグ']); updateSickStatus(); }
-  if(card['ターゲット種別変動']){
-    const newId=TYPE_TRANSFORM_ID[card['ターゲット種別変動']];
-    if(newId) transformCase(idx,newId);
-    return;
-  }
-  checkMarkerThresholds(idx);
-  updateSickStatus();
+  if(!checkCond(card,cs))return;
+  if(nn(card['ターゲット所持金変動']))cs.curCoins=Math.max(0,cs.curCoins+card['ターゲット所持金変動']);
+  if(nn(card['ターゲットメンタル変動']))cs.curMental=Math.max(0,cs.curMental+card['ターゲットメンタル変動']);
+  if(card['面談加算'])cs.meetMk=Math.max(0,cs.meetMk+card['面談加算']);
+  if(card['通院加算'])cs.visitMk=Math.max(0,cs.visitMk+card['通院加算']);
+  if(card['管理加算'])cs.mgmtMk=Math.max(0,cs.mgmtMk+card['管理加算']);
+  if(nn(card['怒りフラグ']))cs.angerFlags=Math.max(0,cs.angerFlags+card['怒りフラグ']);
+  if(nn(card['不正フラグ']))cs.illegalFlags=Math.max(0,cs.illegalFlags+card['不正フラグ']);
+  if(card['自立フラグ']){cs.indFlag=true;addLog(`「${cs.data['カード名']}」自立フラグON`,'good');}
+  if(card['移管フラグ']){resolveCase(idx,'移管（ソロ：除外）');updateSick();render();return;}
+  if(nn(card['病気フラグ']))cs.sickFlag=Math.max(0,cs.sickFlag+card['病気フラグ']);
+  if(card['ターゲット種別変動']){const nid=TYPE_T[card['ターゲット種別変動']];if(nid)transformCase(idx,nid);return;}
+  checkMarkers(idx);updateSick();
 }
 
-// ═══════════════════════════════════════════════════════
-//  HAND MANAGEMENT
-// ═══════════════════════════════════════════════════════
+// ─────────────────────────────────────────
+// HAND MANAGEMENT
+// ─────────────────────────────────────────
 function checkHandLimit(){
   const over=G.hand.length-7;
-  if(over>0) triggerDiscard(over);
+  if(over>0)triggerDiscard(over);
 }
 function triggerDiscard(n,cb){
-  G.discardRequired=n; G.discardCallback=cb||null; G.discardSelected=[];
-  document.getElementById('disc-title').textContent=`手札から${n}枚捨ててください（${G.hand.length}枚中）`;
+  G.discReq=n;G.discCb=cb||null;G.discSel=[];
+  document.getElementById('disc-title').textContent=`手札から${n}枚を捨ててください`;
   document.getElementById('disc-grid').innerHTML=G.hand.map((c,i)=>`
-    <div class="discard-item" id="disc-${i}" onclick="toggleDiscard(${i})">
+    <div class="discard-item" id="di-${i}" onclick="toggleDiscard(${i})">
       <span>${c['カード名']}</span>
-      <span style="font-size:.65rem;color:#555;">${c['種別']} ${c['レアリティ']}</span>
+      <span style="font-size:.63rem;color:#555;">${c['種別']} ${c['レアリティ']}</span>
     </div>`).join('');
   document.getElementById('disc-ok').disabled=true;
   openModal('modal-discard');
 }
 function toggleDiscard(idx){
-  const si=G.discardSelected.indexOf(idx);
-  if(si>=0){ G.discardSelected.splice(si,1); document.getElementById(`disc-${idx}`).classList.remove('selected'); }
-  else if(G.discardSelected.length<G.discardRequired){ G.discardSelected.push(idx); document.getElementById(`disc-${idx}`).classList.add('selected'); }
-  document.getElementById('disc-ok').disabled=G.discardSelected.length<G.discardRequired;
+  const si=G.discSel.indexOf(idx);
+  if(si>=0){G.discSel.splice(si,1);document.getElementById(`di-${idx}`).classList.remove('sel');}
+  else if(G.discSel.length<G.discReq){G.discSel.push(idx);document.getElementById(`di-${idx}`).classList.add('sel');}
+  document.getElementById('disc-ok').disabled=G.discSel.length<G.discReq;
 }
 function confirmDiscard(){
-  G.discardSelected.sort((a,b)=>b-a).forEach(i=>{ G.workerDiscard.push(G.hand.splice(i,1)[0]); });
-  G.discardSelected=[];
-  closeModal('modal-discard');
-  if(G.discardCallback){ G.discardCallback(); G.discardCallback=null; }
+  G.discSel.sort((a,b)=>b-a).forEach(i=>G.wDiscard.push(...G.hand.splice(i,1)));
+  G.discSel=[];closeModal('modal-discard');
+  if(G.discCb){G.discCb();G.discCb=null;}
   render();
 }
 function extraDraw(){
-  if(G.coins<=0||G.actionsLeft<=0) return;
-  G.coins=Math.max(0,G.coins-1);
-  G.actionsLeft--;
-  drawWorker();
-  checkHandLimit();
-  addLog('追加ドロー 💰-1');
-  render();
+  if(G.phase!=='action'||G.actLeft<=0||G.coins<=0)return;
+  G.coins=Math.max(0,G.coins-1);G.actLeft--;
+  drawWorker(1);checkHandLimit();
+  addLog('追加ドロー 💰-1');render();
 }
-function cancelSelect(){
-  G.selectedCard=null;
-  render();
-}
+function cancelSelect(){G.selCard=null;render();}
 
-// ═══════════════════════════════════════════════════════
-//  GAME OVER / WIN
-// ═══════════════════════════════════════════════════════
+// ─────────────────────────────────────────
+// GAME OVER / WIN
+// ─────────────────────────────────────────
 function checkWin(){
-  if(G.mode==='training'&&G.points>=5){
-    G.phase='win';
-    showWin(); return true;
-  }
+  if(G.mode==='training'&&G.points>=5){G.phase='win';saveRecord();showWin();return true;}
   return false;
 }
 function gameOver(reason){
-  if(G.phase==='gameOver') return;
-  G.phase='gameOver';
-  saveEndlessRecord();
+  if(G.phase==='gameOver')return;
+  G.phase='gameOver';saveRecord();
   document.getElementById('over-reason').textContent=reason;
   document.getElementById('over-icon').textContent=reason.includes('監査')?'⚖️':'💀';
-  document.getElementById('over-stats').innerHTML=buildResultStats();
+  document.getElementById('over-stats').innerHTML=buildStats();
   showScreen('scn-over');
 }
-function showWin(){
-  document.getElementById('win-stats').innerHTML=buildResultStats();
-  showScreen('scn-win');
-}
-function buildResultStats(){
-  return `<div class="rs-row"><span class="rs-label">獲得ポイント</span><span class="rs-val">${G.points} pt</span></div>
+function showWin(){document.getElementById('win-stats').innerHTML=buildStats();showScreen('scn-win');}
+function buildStats(){
+  return `<div class="rs-row"><span class="rs-label">獲得PT</span><span class="rs-val">${G.points} pt</span></div>
   <div class="rs-row"><span class="rs-label">ターン数</span><span class="rs-val">${G.turn} T</span></div>
+  <div class="rs-row"><span class="rs-label">担当ケース</span><span class="rs-val">${G.cases.length} 件</span></div>
   <div class="rs-row"><span class="rs-label">モード</span><span class="rs-val">${G.mode==='training'?'トレーニング':'エンドレス'} / ${G.diff==='hard'?'ハード':'ノーマル'}</span></div>`;
 }
-function saveEndlessRecord(){
-  if(G.mode!=='endless') return;
+function saveRecord(){
+  if(G.mode!=='endless')return;
   const save=getSave();
   const key=`rank_${G.diff}`;
-  const records=save[key]||[];
-  records.push({points:G.points,turns:G.turn,date:Date.now()});
-  records.sort((a,b)=>b.points-a.points||b.turns-a.turns);
-  save[key]=records.slice(0,10);
-  setSave(save);
+  const recs=save[key]||[];
+  recs.push({points:G.points,turns:G.turn,date:Date.now()});
+  recs.sort((a,b)=>b.points-a.points||b.turns-a.turns);
+  save[key]=recs.slice(0,10);setSave(save);
 }
-function returnToMode(){ showScreen('scn-mode'); render(); }
-function confirmQuit(){
-  if(confirm('ゲームを終了してメニューに戻りますか？')){ location.href='index.html'; }
-}
-function advancePhase(){ /* フェーズバーの次へ（現在は主にアクション確認用） */ }
-function closeMsgModal(){ closeModal('modal-msg'); if(G._msgCb){G._msgCb();G._msgCb=null;} }
+function returnToMode(){G={};showScreen('scn-mode');}
+function confirmQuit(){if(confirm('ゲームを終了しますか？'))location.href='index.html';}
 
-// ═══════════════════════════════════════════════════════
-//  RENDER
-// ═══════════════════════════════════════════════════════
+// ─────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────
 function render(){
-  if(G.phase===undefined||G.phase==='setup') return;
-  renderTopBar();
+  if(!G.phase||G.phase==='setup')return;
+  renderStatus();
   renderCases();
   renderHand();
-  renderPhaseBar();
-  updateSickStatus();
 }
-function renderTopBar(){
-  const info=document.getElementById('tb-info');
-  const parts=[];
-  parts.push(`<span class="tb-badge tb-turn">T${G.turn}</span>`);
-  parts.push(`<span class="tb-badge tb-pt">⭐${G.points}pt</span>`);
-  parts.push(`<span class="tb-badge tb-coin">💰${G.coins}</span>`);
-  const mc=G.mental<=2?'style="color:#ef9a9a"':'';
-  parts.push(`<span class="tb-badge tb-mental" ${mc}>🧠${G.mental}</span>`);
-  if(G.isSick) parts.push('<span class="tb-badge tb-sick">🦠病気</span>');
-  if(G.auditFlag) parts.push('<span class="tb-badge tb-audit">⚖️監査中</span>');
-  info.innerHTML=parts.join('');
-  document.getElementById('tb-mode').textContent=`${G.mode==='training'?'トレーニング':'エンドレス'} / ${G.diff==='hard'?'ハード':'ノーマル'}`;
-  document.getElementById('sick-label').textContent=G.isSick?'🦠病気状態（回復低下）':'';
+
+function renderStatus(){
+  document.getElementById('sb-turn').textContent=`T${G.turn}`;
+  document.getElementById('sb-mode').textContent=`${G.mode==='training'?'トレーニング':'エンドレス'} / ${G.diff==='hard'?'ハード':'ノーマル'}`;
+  document.getElementById('st-pt').textContent=G.points;
+  document.getElementById('st-coin').textContent=G.coins;
+  document.getElementById('st-mental').textContent=G.mental;
+  const mb=document.getElementById('st-mental-block');
+  mb.className='stat-block s-mental'+(G.mental<=2?' low':'');
+  // フラグ
+  const flags=[];
+  if(G.isSick)flags.push('<span class="sflag sf-sick">🦠 病気</span>');
+  if(G.auditFlag)flags.push('<span class="sflag sf-audit">⚖️ 監査中</span>');
+  if(G.guardFlag)flags.push('<span class="sflag sf-guard">🛡 ガード</span>');
+  document.getElementById('st-flags').innerHTML=flags.join('');
+  // フェーズ
+  const pn={'action':'アクションフェーズ','recovery':'回復中','trouble':'トラブル処理中','addCase':'ケース追加中','turnEnd':'ターンエンド中'};
+  document.getElementById('phase-info').textContent=pn[G.phase]||G.phase;
+  document.getElementById('action-count').textContent=G.phase==='action'?`残行動 ${G.actLeft} / ${G.actTotal}`:'';
+  document.getElementById('action-count').className='action-count'+(G.actLeft<=0?' zero':'');
+  document.getElementById('btn-end-turn').disabled=G.phase!=='action';
 }
+
+function rarCls(r){return r==='UR'?'r-ur':r==='SR'?'r-sr':'r-r';}
+
 function renderCases(){
   const grid=document.getElementById('cases-grid');
   grid.innerHTML='';
-  if(!G.cases.length){ grid.innerHTML='<div style="font-size:.72rem;color:#444;padding:12px;">担当ケースなし</div>'; return; }
+  if(!G.cases.length){
+    grid.innerHTML='<div style="font-size:.72rem;color:#444;padding:14px;">担当ケースなし</div>';return;
+  }
   G.cases.forEach((cs,i)=>{
     const d=cs.data;
     const isHard=d['種別']==='困難';
     const illGlow=cs.illegalFlags>0?' illegal-glow':'';
     const auditGlow=G.auditFlag&&cs.illegalFlags>0?' audit-glow':'';
-    const targeted=G.selectedCard!==null?'targeted':'';
-    const typeColors={'通常':'rgba(76,175,80,.18);color:#81c784','精神':'rgba(156,39,176,.18);color:#ce93d8','困窮':'rgba(255,193,7,.15);color:#ffe082','暴力':'rgba(229,57,53,.18);color:#ef9a9a','困難':'rgba(244,67,54,.25);color:#ff8a65'};
-    const tStyle=typeColors[d['種別']]||'rgba(255,255,255,.07);color:#aaa';
-    const pips=(n,tot)=>`<div class="pips">${Array(tot).fill(0).map((_,j)=>`<div class="pip${j<n?' on':''}"></div>`).join('')}</div>`;
-    const markers=[];
-    markers.push(`<div class="mk mk-anger">😠${pips(Math.min(cs.angerFlags,3),3)}${cs.angerFlags}/3</div>`);
-    if(cs.illegalFlags>0) markers.push(`<div class="mk mk-illegal">🚫不正×${cs.illegalFlags}</div>`);
-    if(cs.sickFlag>0) markers.push(`<div class="mk mk-sick">🦠${cs.sickFlag}</div>`);
-    if(cs.meetMk>0) markers.push(`<div class="mk mk-meet">面${cs.meetMk}/2</div>`);
-    if(cs.visitMk>0) markers.push(`<div class="mk mk-visit">通${cs.visitMk}/2</div>`);
-    if(cs.mgmtMk>0) markers.push(`<div class="mk mk-mgmt">管${cs.mgmtMk}/2</div>`);
-    if(cs.indFlag) markers.push(`<div class="mk" style="background:rgba(76,175,80,.15);border:1px solid rgba(76,175,80,.3);color:#a5d6a7;">自立</div>`);
+    const tgted=G.selCard!==null?' targeted':'';
+    const tSt=TYPE_STYLES[d['種別']]||'rgba(255,255,255,.07);color:#aaa';
+
+    // ピップ
+    const pips=n=>`<div class="pips">${Array(3).fill(0).map((_,j)=>`<div class="pip${j<n?' on':''}"></div>`).join('')}</div>`;
+    // マーカー
+    const mks=[];
+    mks.push(`<div class="mk mk-anger">😠${pips(Math.min(cs.angerFlags,3))} ${cs.angerFlags}/3</div>`);
+    if(cs.illegalFlags>0)mks.push(`<div class="mk mk-illegal">🚫 不正×${cs.illegalFlags}</div>`);
+    if(cs.sickFlag>0)mks.push(`<div class="mk mk-sick">🦠 ${cs.sickFlag}</div>`);
+    if(cs.meetMk>0)mks.push(`<div class="mk mk-meet">面 ${cs.meetMk}/2</div>`);
+    if(cs.visitMk>0)mks.push(`<div class="mk mk-visit">通 ${cs.visitMk}/2</div>`);
+    if(cs.mgmtMk>0)mks.push(`<div class="mk mk-mgmt">管 ${cs.mgmtMk}/2</div>`);
+    if(cs.indFlag)mks.push(`<div class="mk mk-ind">✓自立</div>`);
+    // 毎T・PL・不正条件タグ
+    const ttags=[];
+    const tw=d['ターンエンド_所持金変動'],tm=d['ターンエンド_メンタル変動'];
+    if(nn(tw))ttags.push(`<span class="tag ${tw<0?'t-minus':'t-plus'}">💰${signed(tw)}</span>`);
+    if(nn(tm))ttags.push(`<span class="tag ${tm<0?'t-minus':'t-plus'}">🧠${signed(tm)}</span>`);
+    const pltags=[];
+    const pw=d['プレイヤー所持金変動'],pm=d['プレイヤーメンタル変動'];
+    if(nn(pw))pltags.push(`<span class="tag ${pw<0?'t-minus':'t-plus'}">💰${signed(pw)}</span>`);
+    if(nn(pm))pltags.push(`<span class="tag ${pm<0?'t-minus':'t-plus'}">🧠${signed(pm)}</span>`);
+    const ic=d['ターンエンド_不正フラグ加算条件_所持金'],im=d['ターンエンド_不正フラグ加算条件_メンタル'];
+    const illParts=[];
+    if(nn(ic))illParts.push(`💰≦${ic}`);if(nn(im))illParts.push(`🧠≦${im}`);
+    const income=d['収入フラグ']==='収入あり'?'<span class="bdg bdg-income-yes">🟡 収入</span>':'<span class="bdg bdg-income-no">収入なし</span>';
 
     const el=document.createElement('div');
-    el.className=`case-card ${illGlow}${auditGlow}`;
+    el.className=`case-card${illGlow}${auditGlow}${tgted}`;
     el.innerHTML=`
-      <div class="cc-header">
-        <div style="flex:1">
-          <div class="cc-name">${d['カード名']}</div>
-          <span class="cc-type" style="background:${tStyle};">${d['種別']}</span>
+      <div class="cc-hdr">
+        <div class="cc-left">
+          <span class="cc-id">ID: ${d['ID']}</span>
+          <span class="cc-name">${d['カード名']}</span>
+          <div class="cc-sub">
+            <span class="bdg" style="background:${tSt};">${d['種別']}</span>
+            ${income}
+          </div>
         </div>
-        <div class="cc-pt${isHard?' hard':''}">${d['獲得ポイント']||1}</div>
+        <div class="cc-meta">
+          <div class="cc-meta-top">
+            <div class="pt-badge${isHard?' hard':''}">${d['獲得ポイント']||1}</div>
+            <span class="rar ${rarCls(d['レアリティ'])}">${d['レアリティ']}</span>
+          </div>
+        </div>
       </div>
-      <div class="cc-stats">
-        <span class="cc-stat s-coin">💰${cs.curCoins}</span>
-        <span class="cc-stat s-mental">🧠${cs.curMental}</span>
-      </div>
-      <div class="cc-markers">${markers.join('')}</div>`;
-    if(G.selectedCard!==null){
-      el.classList.add(targeted?'targeted':'');
-      el.onclick=()=>selectTarget_direct(i);
+      <div class="cc-img"><div class="cc-img-grad"></div><span class="cc-noimg">NOIMAGE</span></div>
+      <div class="cc-markers">${mks.join('')}</div>
+      <div class="cc-body">
+        <div class="cc-stats-row">
+          <span class="cc-stat cs-coin">💰 ${cs.curCoins}</span>
+          <span class="cc-stat cs-mental">🧠 ${cs.curMental}</span>
+          ${cs.sickFlag>0?`<span class="cc-stat cs-sick">🦠 ${cs.sickFlag}</span>`:''}
+        </div>
+        <div class="cc-divider"></div>
+        <div class="cc-effects">
+          ${ttags.length?`<span style="font-size:.5rem;color:#555;margin-right:2px;">毎T</span>${ttags.join('')}`:''}
+          ${pltags.length?`<span style="font-size:.5rem;color:#555;margin-right:2px;margin-left:4px;">PL</span>${pltags.join('')}`:''}
+        </div>
+        ${illParts.length?`<div style="margin-top:2px;"><span class="ill-cond">${illParts.join('　')}</span></div>`:''}
+      </div>`;
+    // クリックイベント
+    if(G.selCard!==null){
+      el.onclick=()=>onClickCaseTarget(i);
     } else {
       el.onclick=()=>showCaseDetail(i);
     }
     grid.appendChild(el);
   });
 }
-function selectTarget_direct(caseIdx){
-  if(G.selectedCard===null) return;
-  const card=G.hand[G.selectedCard];
+
+function onClickCaseTarget(idx){
+  if(G.selCard===null)return;
+  const card=G.hand[G.selCard];
   const range=card['対象範囲'];
-  if(range==='自分'||range==='ワーカー単体'||range==='ワーカー全員') return;
-  if(!checkConditions(card,G.cases[caseIdx])){addLog('この対象には使用条件を満たしていません','danger');return;}
-  const hi=G.selectedCard;
-  G.selectedCard=null;
+  if(['自分','ワーカー単体','ワーカー全員'].includes(range))return;
+  if(!checkCond(card,G.cases[idx])){addLog('使用条件を満たしていません','danger');return;}
+  // _targetsからidxを探す
+  const ti=G._targets.findIndex(t=>t.type==='case'&&t.idx===idx);
+  if(ti<0)return;
+  const hi=G.selCard;G.selCard=null;
   closeModal('modal-card');
-  executeCard(hi,{type:'case',idx:caseIdx});
+  doUse(hi,ti);
 }
+
 function showCaseDetail(idx){
-  const cs=G.cases[idx];
-  const d=cs.data;
-  const detail=`${d['効果詳細テキスト']||''}\n\n💰${cs.curCoins} / 🧠${cs.curMental}\n怒り${cs.angerFlags} 不正${cs.illegalFlags} 病気${cs.sickFlag}`;
-  document.getElementById('mc-name').textContent=d['カード名'];
-  document.getElementById('mc-detail').textContent=detail;
-  document.getElementById('mc-targets').innerHTML='';
-  const btns=document.querySelector('#modal-card .modal-btns');
-  btns.innerHTML='<button class="mbtn mbtn-close" onclick="closeModal(\'modal-card\')">閉じる</button>';
-  openModal('modal-card');
+  const cs=G.cases[idx];const d=cs.data;
+  document.getElementById('cd-title').textContent=d['カード名'];
+  document.getElementById('cd-text').textContent=
+    `${d['効果詳細テキスト']||''}\n\n💰${cs.curCoins} / 🧠${cs.curMental}\n怒り${cs.angerFlags} 不正${cs.illegalFlags} 病気${cs.sickFlag}\n面談${cs.meetMk} 通院${cs.visitMk} 管理${cs.mgmtMk}`;
+  openModal('modal-case-detail');
 }
+
 function renderHand(){
   const scroll=document.getElementById('hand-scroll');
   scroll.innerHTML='';
+  const isAct=G.phase==='action';
   G.hand.forEach((card,i)=>{
-    const isSel=G.selectedCard===i;
-    const affordable=canAfford(card);
-    const targets=getValidTargets(card);
-    const hasTarget=G.phase==='action'&&targets.length>0&&affordable&&G.actionsLeft>0;
-    const el=document.createElement('div');
-    el.className=`worker-card${isSel?' selected':''}${!hasTarget?' unusable':''}`;
+    const isSel=G.selCard===i;
+    const hasAct=isAct&&G.actLeft>0;
+    const usable=hasAct&&canAfford(card)&&hasAnyTarget(card);
     const rar=card['レアリティ'];
-    const rarCls=rar==='UR'?'r-ur':rar==='SR'?'r-sr':'r-r';
-    // コスト・効果タグ
+    const el=document.createElement('div');
+    el.className=`wk-card${isSel?' selected':''}${!usable?' unusable':''}`;
+    // タグ生成
     const tags=[];
     const pw=card['プレイヤー所持金変動'],pm=card['プレイヤーメンタル変動'];
-    if(pw!==null&&pw!==undefined) tags.push(`<span class="tag ${pw<0?'t-minus':'t-plus'}">💰${signed(pw)}</span>`);
-    if(pm!==null&&pm!==undefined) tags.push(`<span class="tag ${pm<0?'t-minus':'t-plus'}">🧠${signed(pm)}</span>`);
+    if(nn(pw))tags.push(`<span class="tag ${pw<0?'t-minus':'t-plus'}">💰${signed(pw)}</span>`);
+    if(nn(pm))tags.push(`<span class="tag ${pm<0?'t-minus':'t-plus'}">🧠${signed(pm)}</span>`);
     const tw=card['ターゲット所持金変動'],tm=card['ターゲットメンタル変動'];
-    if(tw!==null&&tw!==undefined) tags.push(`<span class="tag ${tw<0?'t-minus':'t-plus'}">💰${signed(tw)}</span>`);
-    if(tm!==null&&tm!==undefined) tags.push(`<span class="tag ${tm<0?'t-minus':'t-plus'}">🧠${signed(tm)}</span>`);
-    if(card['面談加算']) tags.push(`<span class="tag t-special">面+${card['面談加算']}</span>`);
-    if(card['通院加算']) tags.push(`<span class="tag t-special">通+${card['通院加算']}</span>`);
-    if(card['管理加算']) tags.push(`<span class="tag t-special">管+${card['管理加算']}</span>`);
-    if(card['怒りフラグ']!==null&&card['怒りフラグ']!==undefined) tags.push(`<span class="tag t-special">😠${signed(card['怒りフラグ'])}</span>`);
-    if(card['不正フラグ']!==null&&card['不正フラグ']!==undefined) tags.push(`<span class="tag t-special">不正${signed(card['不正フラグ'])}</span>`);
-    if(card['自立フラグ']) tags.push(`<span class="tag t-special">自立</span>`);
-    if(card['ドロー数']) tags.push(`<span class="tag t-special">ドロー+${card['ドロー数']}</span>`);
+    if(nn(tw))tags.push(`<span class="tag ${tw<0?'t-minus':'t-plus'}">💰${signed(tw)}</span>`);
+    if(nn(tm))tags.push(`<span class="tag ${tm<0?'t-minus':'t-plus'}">🧠${signed(tm)}</span>`);
+    if(card['面談加算'])tags.push(`<span class="tag t-special">面+${card['面談加算']}</span>`);
+    if(card['通院加算'])tags.push(`<span class="tag t-special">通+${card['通院加算']}</span>`);
+    if(card['管理加算'])tags.push(`<span class="tag t-special">管+${card['管理加算']}</span>`);
+    if(nn(card['怒りフラグ']))tags.push(`<span class="tag t-special">😠${signed(card['怒りフラグ'])}</span>`);
+    if(nn(card['不正フラグ']))tags.push(`<span class="tag t-special">不正${signed(card['不正フラグ'])}</span>`);
+    if(card['自立フラグ'])tags.push(`<span class="tag t-special">自立</span>`);
+    if(card['ドロー数'])tags.push(`<span class="tag t-special">ドロー+${card['ドロー数']}</span>`);
+    if(card['ターゲット種別変動'])tags.push(`<span class="tag t-special">→${card['ターゲット種別変動']}</span>`);
+
     el.innerHTML=`
-      <div class="wc-top">
-        <div class="wc-name">${card['カード名']}</div>
-        <span class="wc-rar ${rarCls}">${rar}</span>
+      <div class="wk-hdr">
+        <div class="wk-left">
+          <span class="wk-id">ID: ${card['ID']}</span>
+          <span class="wk-name">${card['カード名']}</span>
+          <div class="wk-sub">
+            <span class="bdg-type-w">${card['種別']}</span>
+          </div>
+        </div>
+        <div class="wk-meta">
+          <span class="rar ${rarCls(rar)}">${rar}</span>
+        </div>
       </div>
-      <div class="wc-body">
-        <div class="wc-row"><span class="tag t-target" style="font-size:.52rem;">${card['対象範囲']||'—'}</span></div>
-        <div class="wc-row">${tags.join('')||'<span class="tag t-neutral">詳細タップ</span>'}</div>
+      <div class="wk-img"><div class="wk-img-grad"></div><span class="wk-noimg">NOIMAGE</span></div>
+      <div class="wk-body">
+        <div class="wk-row">
+          <span class="tag t-target" style="font-size:.52rem;">${card['対象範囲']||'—'}</span>
+          ${card['使用条件_ケース種別']?`<span class="tag t-cond" style="font-size:.52rem;">${card['使用条件_ケース種別']}</span>`:''}
+        </div>
+        <div class="wk-row">${tags.join('')||'<span class="tag t-neutral" style="font-size:.52rem;">効果：詳細参照</span>'}</div>
       </div>`;
-    el.onclick=()=>{ if(G.phase==='action') onClickWorkerCard(i); };
+    el.onclick=()=>{if(isAct&&G.actLeft>0)onClickWorker(i);};
     scroll.appendChild(el);
   });
-  document.getElementById('hand-count').textContent=`${G.hand.length}/7枚`;
+  document.getElementById('hand-count').textContent=`${G.hand.length}/7`;
+  document.getElementById('btn-xdraw').disabled=G.phase!=='action'||G.actLeft<=0||G.coins<=0;
+  document.getElementById('btn-cancel').style.display=G.selCard!==null?'inline-block':'none';
+}
 
-  // ボトムバー
-  const isAction=G.phase==='action';
-  const hasAct=G.actionsLeft>0;
-  document.getElementById('bbtn-draw').disabled=!isAction||!hasAct||G.coins<=0;
-  document.getElementById('bbtn-end').disabled=!isAction;
-  document.getElementById('bbtn-cancel').style.display=G.selectedCard!==null?'block':'none';
-}
-function renderPhaseBar(){
-  const phaseNames={'recovery':'回復フェーズ','caseStats':'ケース変動フェーズ','trouble':'トラブルフェーズ','addCase':'ケース追加フェーズ','action':'アクションフェーズ','turnEnd':'ターンエンド処理','gameOver':'ゲームオーバー','win':'クリア'};
-  document.getElementById('phase-label').textContent=(phaseNames[G.phase]||G.phase)+(G.phase==='action'?` （残行動：${G.actionsLeft}）`:'');
-  document.getElementById('btn-next').style.display='none';
-}
-function updatePhaseBar(){ renderPhaseBar(); }
 function addLog(msg,type=''){
+  G.log=(G.log||[]);
   G.log.unshift({msg,type});
-  if(G.log.length>40) G.log.pop();
+  if(G.log.length>50)G.log.pop();
   const area=document.getElementById('log-area');
-  if(!area) return;
-  area.innerHTML=G.log.slice(0,15).map(e=>`<div class="log-entry${e.type?' '+e.type:''}">${e.msg}</div>`).join('');
+  if(!area)return;
+  area.innerHTML=G.log.slice(0,15).map(e=>`<div class="log-line${e.type?` lc-${e.type}`:''}">${e.msg}</div>`).join('');
 }
 
-// ── 初期表示 ──
+// ── boot ──
 showScreen('scn-mode');
 </script>
 </body>

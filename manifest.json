@@ -1,6 +1,6 @@
 {
   "name": "最強のケースワーカーは誰だ",
-  "short_name": "ケースワーカー",
+  "short_name": "CW-Game",
   "description": "生活保護ケースワーカー体験ボードゲーム",
   "start_url": "./index.html",
   "display": "standalone",

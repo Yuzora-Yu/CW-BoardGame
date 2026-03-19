@@ -29,7 +29,7 @@ body{font-family:'Noto Sans JP',sans-serif;color:#fff;user-select:none;}
 /* ════════════════════════════════════════
    SCREEN SWITCHER
 ════════════════════════════════════════ */
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto;z-index:1;}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
 .screen.hidden{display:none!important;}
 
 /* ════════════════════════════════════════
@@ -417,14 +417,8 @@ body{font-family:'Noto Sans JP',sans-serif;color:#fff;user-select:none;}
 /* ════════════════════════════════════════
    RESULT SCREENS
 ════════════════════════════════════════ */
-#scn-over{
-  background:var(--bg);background-image:radial-gradient(ellipse at 50% 40%,#2a0d0d,transparent 60%);
-  z-index:60;  /* modal-bg(50)より上、ind-popup(80)より下 → gameOver時はモーダルを全部閉じるので問題なし */
-}
-#scn-win{
-  background:var(--bg);background-image:radial-gradient(ellipse at 50% 40%,#0d2a0d,transparent 60%);
-  z-index:60;
-}
+#scn-over{background:var(--bg);background-image:radial-gradient(ellipse at 50% 40%,#2a0d0d,transparent 60%);}
+#scn-win{background:var(--bg);background-image:radial-gradient(ellipse at 50% 40%,#0d2a0d,transparent 60%);}
 .result-icon{font-size:3rem;margin-bottom:6px;}
 .result-title{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:.15em;margin-bottom:4px;}
 #scn-over .result-title{color:var(--red-l);}
@@ -1136,9 +1130,6 @@ function applyTrouble(card, cb){
       if(pm<0)addLog(`PL🧠${signed(pm*cnt)}`,'danger');
     }
   }
-  // メンタル0チェック（ここで即座に判定して早期リターン）
-  if(G.mental<=0){ gameOver('トラブルカードによるメンタル崩壊'); return; }
-
   // プレイヤー影響（コイン）
   if(pw!==0&&!auditF){
     const cnt=multi?G.cases.length:1;
@@ -1163,14 +1154,13 @@ function applyTrouble(card, cb){
   });
   if(newC>0)for(let i=0;i<newC;i++)drawCase();
   updateSick();
+  if(G.mental<=0){ G.phase='gameOver'; render(); if(cb)cb(); return; }
   render();
 
   // 手札強制捨て（選択式）
   if(ph>0&&G.hand.length>0){
     const n=Math.min(ph,G.hand.length);
-    triggerDiscard(n, ()=>{
-      if(cb)cb();
-    });
+    triggerDiscard(n, ()=>{ if(cb)cb(); });
     return;
   }
   if(cb)cb();
@@ -1384,11 +1374,6 @@ function checkWin(){
 function gameOver(reason){
   if(G.phase==='gameOver')return;
   G.phase='gameOver';saveRecord();
-  // 開いているモーダルを全て閉じる
-  ['modal-card','modal-trouble','modal-roulette','modal-discard','modal-case-detail','ind-popup'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el){el.classList.add('hidden');}
-  });
   document.getElementById('over-reason').textContent=reason;
   document.getElementById('over-icon').textContent=reason.includes('監査')?'⚖️':'💀';
   document.getElementById('over-stats').innerHTML=buildStats();
@@ -1417,7 +1402,7 @@ function confirmQuit(){if(confirm('ゲームを終了しますか？'))location.
 // RENDER
 // ─────────────────────────────────────────
 function render(){
-  if(!G.phase||G.phase==='setup'||G.phase==='gameOver'||G.phase==='win')return;
+  if(!G.phase||G.phase==='setup')return;
   renderStatus();
   renderCases();
   renderHand();

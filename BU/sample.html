@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>カードUIサンプル — 最強のケースワーカーは誰だ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="workerCards.js"></script>
+<script src="caseCards.js"></script>
+<script src="troubleCards.js"></script>
+<style>
+  :root {
+    --worker-bg1:#1e3d1e;--worker-bg2:#0f1f0f;--worker-border:#3a6b3a;--worker-glow:rgba(45,106,45,0.35);--worker-name:#a5d6a7;--worker-div:#4caf50;
+    --trouble-bg1:#1a1a1a;--trouble-bg2:#0d0d0d;--trouble-border:#444;--trouble-name:#e0e0e0;
+    --case-bg1:#3d1e1e;--case-bg2:#1f0f0f;--case-border:#6b3a3a;--case-glow:rgba(139,26,26,0.35);--case-name:#ef9a9a;--case-div:#e53935;
+    --ur-bg:rgba(255,107,53,0.25);--ur-c:#ff8a65;--ur-bd:rgba(255,107,53,0.4);
+    --sr-bg:rgba(156,39,176,0.25);--sr-c:#ce93d8;--sr-bd:rgba(156,39,176,0.4);
+    --r-bg:rgba(21,101,192,0.25);--r-c:#90caf9;--r-bd:rgba(21,101,192,0.4);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:#0d0d0d;
+    background-image:radial-gradient(ellipse at 20% 50%,#1a2a1a,transparent 60%),radial-gradient(ellipse at 80% 20%,#1a1a2a,transparent 60%),radial-gradient(ellipse at 60% 80%,#2a1a1a,transparent 60%);
+    min-height:100vh;font-family:'Noto Sans JP',sans-serif;padding:40px 20px 80px;color:#fff;
+  }
+  .page-title{text-align:center;font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:.15em;color:#ccc;margin-bottom:6px;}
+  .page-sub{text-align:center;font-size:.78rem;color:#555;margin-bottom:40px;letter-spacing:.1em;}
+  .section{margin-bottom:60px;}
+  .section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.07);}
+  .section-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.2em;}
+  .section-count{font-size:.72rem;color:#555;letter-spacing:.1em;}
+  .section-worker .section-title{color:#66bb6a;}
+  .section-trouble .section-title{color:#aaa;}
+  .section-case .section-title{color:#ef5350;}
+  .cards-grid{display:flex;flex-wrap:wrap;gap:14px;}
+
+  /* ── カード共通 ── */
+  .card{width:220px;border-radius:13px;overflow:hidden;cursor:default;position:relative;transition:transform .18s ease,box-shadow .18s ease;user-select:none;flex-shrink:0;display:flex;flex-direction:column;}
+  .card:hover{transform:translateY(-4px) scale(1.01);}
+  .card-worker{background:linear-gradient(160deg,var(--worker-bg1),var(--worker-bg2));border:2px solid var(--worker-border);box-shadow:0 6px 24px var(--worker-glow),0 0 0 1px rgba(76,175,80,.1);}
+  .card-worker:hover{box-shadow:0 14px 40px rgba(45,106,45,.5),0 0 18px rgba(76,175,80,.2);}
+  .card-trouble{background:linear-gradient(160deg,var(--trouble-bg1),var(--trouble-bg2));border:2px solid var(--trouble-border);box-shadow:0 6px 24px rgba(0,0,0,.55);}
+  .card-trouble:hover{box-shadow:0 14px 40px rgba(0,0,0,.75),0 0 18px rgba(255,100,50,.16);border-color:#666;}
+  .card-case{background:linear-gradient(160deg,var(--case-bg1),var(--case-bg2));border:2px solid var(--case-border);box-shadow:0 6px 24px var(--case-glow),0 0 0 1px rgba(229,57,53,.1);}
+  .card-case:hover{box-shadow:0 14px 40px rgba(139,26,26,.5),0 0 18px rgba(229,57,53,.2);}
+
+  /* ── 詳細テキストエリア ── */
+  .card-detail{
+    margin:4px 8px 8px;
+    padding:7px 8px;
+    background:rgba(0,0,0,.25);
+    border-radius:6px;
+    font-size:.62rem;
+    line-height:1.65;
+    font-family:'Noto Serif JP',serif;
+    color:#888;
+    white-space:pre-wrap;
+    word-break:break-all;
+  }
+  .card-worker .card-detail{border-left:2px solid rgba(76,175,80,.25);}
+  .card-trouble .card-detail{border-left:2px solid rgba(255,100,50,.25);}
+  .card-case .card-detail{border-left:2px solid rgba(229,57,53,.25);}
+
+  /* ── ヘッダー ── */
+  .card-header{padding:9px 11px 7px;display:flex;align-items:flex-start;justify-content:space-between;gap:5px;}
+  .card-header-left{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
+  .card-id{font-size:.58rem;letter-spacing:.1em;opacity:.38;font-family:'Bebas Neue',sans-serif;}
+  .card-name{font-size:.84rem;font-weight:700;line-height:1.2;letter-spacing:.02em;}
+  .card-worker .card-name{color:var(--worker-name);}
+  .card-trouble .card-name{color:var(--trouble-name);}
+  .card-case .card-name{color:var(--case-name);}
+  .card-sub-row{display:flex;gap:3px;margin-top:2px;align-items:center;flex-wrap:wrap;}
+  .card-meta{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
+  .card-meta-top{display:flex;align-items:center;gap:3px;}
+  .card-deck{font-size:.52rem;opacity:.38;letter-spacing:.05em;}
+
+  /* レアリティ */
+  .rar{font-family:'Bebas Neue',sans-serif;font-size:.7rem;letter-spacing:.1em;padding:1px 5px;border-radius:3px;line-height:1.5;}
+  .r-ur{background:var(--ur-bg);color:var(--ur-c);border:1px solid var(--ur-bd);}
+  .r-sr{background:var(--sr-bg);color:var(--sr-c);border:1px solid var(--sr-bd);}
+  .r-r{background:var(--r-bg);color:var(--r-c);border:1px solid var(--r-bd);}
+
+  /* ポイントバッジ */
+  .pt-badge{width:23px;height:23px;border-radius:50%;background:linear-gradient(135deg,#d4a017,#f5c842);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.8rem;color:#1a1000;box-shadow:0 2px 7px rgba(212,160,23,.5);flex-shrink:0;}
+  .pt-badge.hard{background:linear-gradient(135deg,#e53935,#ff7043);color:#fff;box-shadow:0 2px 7px rgba(229,57,53,.5);}
+
+  /* バッジ系 */
+  .badge{font-size:.57rem;padding:1px 5px;border-radius:3px;line-height:1.5;}
+  .b-worker{background:rgba(76,175,80,.18);color:#81c784;}
+  .b-income-yes{background:rgba(255,193,7,.16);color:#ffd54f;border:1px solid rgba(255,193,7,.32);}
+  .b-income-no{background:rgba(255,255,255,.04);color:#555;border:1px solid rgba(255,255,255,.07);}
+
+  /* ── 画像 ── */
+  .card-image{height:96px;margin:0 8px;border-radius:7px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;}
+  .card-worker .card-image{background:linear-gradient(135deg,#1b4d1b,#2d6b2d);}
+  .card-trouble .card-image{background:linear-gradient(135deg,#111,#2a2a2a);}
+  .card-case .card-image{background:linear-gradient(135deg,#4d1b1b,#6b2d2d);}
+  .img-grad{position:absolute;inset:0;opacity:.32;}
+  .card-worker .img-grad{background:radial-gradient(ellipse at 30% 60%,#66bb6a,transparent 55%),radial-gradient(ellipse at 80% 30%,#388e3c,transparent 50%);}
+  .card-trouble .img-grad{background:radial-gradient(ellipse at 50% 50%,#ff5722,transparent 60%);}
+  .card-case .img-grad{background:radial-gradient(ellipse at 40% 60%,#ef5350,transparent 55%),radial-gradient(ellipse at 75% 30%,#b71c1c,transparent 50%);}
+  .no-img{font-size:.62rem;opacity:.22;letter-spacing:.15em;text-transform:uppercase;z-index:1;}
+
+  /* ── マーカー ── */
+  .card-markers{display:flex;gap:4px;padding:5px 9px 3px;flex-wrap:wrap;min-height:26px;}
+  .marker{display:flex;align-items:center;gap:2px;font-size:.57rem;padding:2px 5px;border-radius:4px;line-height:1;}
+  .m-anger{background:rgba(255,87,34,.17);border:1px solid rgba(255,87,34,.35);color:#ff8a65;}
+  .m-sick{background:rgba(156,204,101,.12);border:1px solid rgba(156,204,101,.3);color:#aed581;}
+  .pips{display:flex;gap:2px;align-items:center;}
+  .pip{width:7px;height:7px;border-radius:50%;border:1px solid rgba(255,87,34,.4);}
+  .pip.on{background:#ff5722;border-color:#ff5722;}
+
+  /* ── カード下部 ── */
+  .card-body{padding:5px 9px 9px;display:flex;flex-direction:column;gap:3px;}
+  .divider{height:1px;margin:2px 0;opacity:.15;}
+  .card-worker .divider{background:var(--worker-div);}
+  .card-trouble .divider{background:#777;}
+  .card-case .divider{background:var(--case-div);}
+  .card-row{display:flex;align-items:center;gap:5px;min-height:18px;flex-wrap:wrap;}
+  .row-lbl{font-size:.5rem;letter-spacing:.1em;opacity:.38;white-space:nowrap;min-width:24px;}
+  .row-val{display:flex;gap:3px;flex-wrap:wrap;flex:1;}
+  .tag{font-size:.59rem;padding:1px 5px;border-radius:3px;white-space:nowrap;line-height:1.6;font-weight:500;}
+  .t-target{background:rgba(255,255,255,.06);color:#bbb;border:1px solid rgba(255,255,255,.09);}
+  .t-cond{background:rgba(255,193,7,.1);color:#ffe082;border:1px solid rgba(255,193,7,.2);}
+  .t-plus{background:rgba(76,175,80,.13);color:#a5d6a7;border:1px solid rgba(76,175,80,.26);font-weight:700;}
+  .t-minus{background:rgba(229,57,53,.13);color:#ef9a9a;border:1px solid rgba(229,57,53,.26);font-weight:700;}
+  .t-neutral{background:rgba(255,255,255,.05);color:#bbb;border:1px solid rgba(255,255,255,.09);}
+  .t-special{background:rgba(156,39,176,.13);color:#ce93d8;border:1px solid rgba(156,39,176,.26);}
+  .stat-box{display:flex;align-items:center;gap:2px;font-size:.61rem;padding:2px 5px;border-radius:4px;}
+  .s-coin{background:rgba(255,193,7,.1);color:#ffe082;border:1px solid rgba(255,193,7,.2);}
+  .s-mental{background:rgba(33,150,243,.1);color:#90caf9;border:1px solid rgba(33,150,243,.2);}
+  .s-sick{background:rgba(156,204,101,.1);color:#aed581;border:1px solid rgba(156,204,101,.2);}
+  .ill-cond{font-size:.57rem;color:#ef9a9a;opacity:.72;padding:1px 5px;border-radius:3px;border:1px dashed rgba(229,57,53,.26);background:rgba(229,57,53,.04);}
+  .tap-hint{text-align:center;font-size:.5rem;opacity:.18;letter-spacing:.1em;margin-top:3px;padding-top:3px;border-top:1px solid rgba(255,255,255,.04);}
+
+  /* ── モーダル ── */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);z-index:100;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.active{display:flex;}
+  .modal-box{background:#1a1a1a;border-radius:16px;padding:24px;max-width:340px;width:100%;animation:mIn .2s ease;}
+  @keyframes mIn{from{opacity:0;transform:scale(.92) translateY(8px);}to{opacity:1;transform:scale(1) translateY(0);}}
+  .modal-worker{border:2px solid #3a6b3a;box-shadow:0 0 40px rgba(45,106,45,.26);}
+  .modal-trouble{border:2px solid #555;box-shadow:0 0 40px rgba(255,100,50,.18);}
+  .modal-case{border:2px solid #6b3a3a;box-shadow:0 0 40px rgba(139,26,26,.26);}
+  .modal-title{font-size:1.02rem;font-weight:700;margin-bottom:12px;}
+  .modal-worker .modal-title{color:#a5d6a7;}
+  .modal-trouble .modal-title{color:#e0e0e0;}
+  .modal-case .modal-title{color:#ef9a9a;}
+  .modal-text{font-size:.82rem;line-height:1.75;color:#ccc;font-family:'Noto Serif JP',serif;margin-bottom:18px;white-space:pre-wrap;}
+  .modal-btns{display:flex;gap:10px;}
+  .btn{flex:1;padding:9px;border-radius:8px;border:none;font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;transition:opacity .15s;}
+  .btn:hover{opacity:.82;}
+  .btn-use{background:#2d6a2d;color:#a5d6a7;}
+  .btn-cancel,.btn-close{background:#252525;color:#777;}
+
+  /* トラブルポップアップ */
+  .t-popup{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100;align-items:center;justify-content:center;padding:20px;}
+  .t-popup.active{display:flex;}
+  .t-popup-inner{background:#111;border:2px solid #555;border-radius:16px;padding:28px 24px;max-width:340px;width:100%;text-align:center;animation:mIn .22s ease;box-shadow:0 0 55px rgba(255,100,50,.26);}
+  .tp-icon{font-size:2.4rem;margin-bottom:10px;}
+  .tp-name{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.1em;color:#ff8a65;margin-bottom:13px;}
+  .tp-text{font-size:.82rem;line-height:1.75;color:#ccc;font-family:'Noto Serif JP',serif;text-align:left;margin-bottom:20px;white-space:pre-wrap;}
+  .btn-tp{background:#222;color:#ccc;border:1px solid #444;padding:9px 28px;border-radius:8px;font-family:'Noto Sans JP',sans-serif;font-weight:700;cursor:pointer;font-size:.86rem;}
+</style>
+</head>
+<style>
+.smp-hdr{position:sticky;top:0;z-index:10;background:rgba(13,13,13,.95);backdrop-filter:blur(8px);padding:10px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #1a1a1a;}
+.smp-back{background:#1a1a1a;border:1px solid #333;color:#888;padding:5px 14px;border-radius:8px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;font-size:.78rem;}
+.smp-hdr-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.15em;color:#666;}
+</style>
+<body>
+<div class="smp-hdr">
+  <button class="smp-back" onclick="history.back()">← 戻る</button>
+  <span class="smp-hdr-title">CARD LIST</span>
+</div>
+
+<h1 class="page-title" style="margin-top:20px;">CARD UI SAMPLE</h1>
+<p class="page-sub">最強のケースワーカーは誰だ — 全カード表示</p>
+
+<div class="section section-worker">
+  <div class="section-header">
+    <span class="section-title">① WORKER CARDS</span>
+    <span class="section-count" id="cnt-w"></span>
+  </div>
+  <div class="cards-grid" id="grid-w"></div>
+</div>
+
+<div class="section section-trouble">
+  <div class="section-header">
+    <span class="section-title">② TROUBLE CARDS</span>
+    <span class="section-count" id="cnt-t"></span>
+  </div>
+  <div class="cards-grid" id="grid-t"></div>
+</div>
+
+<div class="section section-case">
+  <div class="section-header">
+    <span class="section-title">③ CASE CARDS</span>
+    <span class="section-count" id="cnt-c"></span>
+  </div>
+  <div class="cards-grid" id="grid-c"></div>
+</div>
+
+<!-- ワーカーモーダル -->
+<div class="modal-overlay" id="wModal" onclick="closeModal('wModal')">
+  <div class="modal-box modal-worker" onclick="event.stopPropagation()">
+    <div class="modal-title" id="wm-title"></div>
+    <div class="modal-text"  id="wm-text"></div>
+    <div class="modal-btns">
+      <button class="btn btn-use"    onclick="closeModal('wModal')">使う</button>
+      <button class="btn btn-cancel" onclick="closeModal('wModal')">やめる</button>
+    </div>
+  </div>
+</div>
+
+<!-- ケースモーダル -->
+<div class="modal-overlay" id="cModal" onclick="closeModal('cModal')">
+  <div class="modal-box modal-case" onclick="event.stopPropagation()">
+    <div class="modal-title" id="cm-title"></div>
+    <div class="modal-text"  id="cm-text"></div>
+    <div class="modal-btns">
+      <button class="btn btn-close" onclick="closeModal('cModal')">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- トラブルポップアップ -->
+<div class="t-popup" id="tPopup">
+  <div class="t-popup-inner">
+    <div class="tp-icon" id="tp-icon"></div>
+    <div class="tp-name" id="tp-name"></div>
+    <div class="tp-text" id="tp-text"></div>
+    <button class="btn-tp" onclick="closeModal('tPopup')">確認</button>
+  </div>
+</div>
+
+<script>
+// ── ユーティリティ ──────────────────────────────────
+function tag(cls, text){ return `<span class="tag ${cls}">${text}</span>`; }
+function signed(n){ return n > 0 ? `+${n}` : `${n}`; }
+function numTag(n, icon){ return n===null||n===undefined ? null : tag(n<0?'t-minus':'t-plus', `${icon} ${signed(n)}`); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/'/g,"&#39;").replace(/\n/g,'\\n'); }
+function rarCls(r){ return r==='UR'?'r-ur':r==='SR'?'r-sr':'r-r'; }
+
+const TYPE_ST = {
+  '通常':'rgba(76,175,80,0.18);color:#81c784',
+  '精神':'rgba(156,39,176,0.2);color:#ce93d8',
+  '困窮':'rgba(255,193,7,0.16);color:#ffe082',
+  '暴力':'rgba(229,57,53,0.2);color:#ef9a9a',
+  '困難':'rgba(244,67,54,0.26);color:#ff8a65',
+};
+const T_ICONS = {
+  '指導検査':'⚖️','法改正':'📜','支給漏れ':'💸','所得隠し':'🕵️',
+  '業務妨害':'🚧','電波攻撃':'📡','精神不調':'🌀','不景気':'📉',
+  '保護費減額':'💔','大災害':'🌊','コロナ禍':'🦠'
+};
+
+// ── ワーカーカード ───────────────────────────────────
+function buildWorker(d){
+  const conds=[];
+  if(d['使用条件_ケース種別'])           conds.push(tag('t-cond',d['使用条件_ケース種別']));
+  if(d['使用条件_フラグ'])              conds.push(tag('t-cond',d['使用条件_フラグ']));
+  if(d['使用条件_ケース所持下限']!=null) conds.push(tag('t-cond',`💰≧${d['使用条件_ケース所持下限']}`));
+  if(d['使用条件_ケース所持上限']!=null) conds.push(tag('t-cond',`💰≦${d['使用条件_ケース所持上限']}`));
+  if(d['使用条件_ケースメンタル下限']!=null) conds.push(tag('t-cond',`🧠≧${d['使用条件_ケースメンタル下限']}`));
+  if(d['使用条件_ケースメンタル上限']!=null) conds.push(tag('t-cond',`🧠≦${d['使用条件_ケースメンタル上限']}`));
+
+  const pl=[];
+  const pw=numTag(d['プレイヤー所持金変動'],'💰'), pm=numTag(d['プレイヤーメンタル変動'],'🧠');
+  if(pw)pl.push(pw); if(pm)pl.push(pm);
+
+  const ef=[];
+  const tw=numTag(d['ターゲット所持金変動'],'💰'), tm=numTag(d['ターゲットメンタル変動'],'🧠');
+  if(tw)ef.push(tw); if(tm)ef.push(tm);
+
+  const sp=[];
+  if(d['ターゲット種別変動'])    sp.push(tag('t-special',`→${d['ターゲット種別変動']}`));
+  if(d['面談加算'])  sp.push(tag('t-special',`面談 ${signed(d['面談加算'])}`));
+  if(d['通院加算'])  sp.push(tag('t-special',`通院 ${signed(d['通院加算'])}`));
+  if(d['管理加算'])  sp.push(tag('t-special',`管理 ${signed(d['管理加算'])}`));
+  if(d['怒りフラグ']!=null) sp.push(tag('t-special',`😠 ${signed(d['怒りフラグ'])}`));
+  if(d['不正フラグ']!=null) sp.push(tag('t-special',`不正 ${signed(d['不正フラグ'])}`));
+  if(d['自立フラグ']) sp.push(tag('t-special','自立'));
+  if(d['移管フラグ']) sp.push(tag('t-special','移管'));
+  if(d['病気フラグ']!=null) sp.push(tag('t-special',`🦠 ${signed(d['病気フラグ'])}`));
+  if(d['ドロー数'])  sp.push(tag('t-special',`ドロー +${d['ドロー数']}`));
+  if(d['捨て札数'])  sp.push(tag('t-special',`捨て -${d['捨て札数']}`));
+  if(d['プレイヤーガードフラグ']) sp.push(tag('t-special','ガード'));
+  if(d['乗算フラグ']) sp.push(tag('t-special','×ケース数'));
+
+  const condRow = conds.length ? `<div class="card-row"><span class="row-lbl">条件</span><div class="row-val">${conds.join('')}</div></div>` : '';
+  const none = tag('t-neutral','— なし —');
+
+  return `<div class="card card-worker">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="card-id">ID: ${d['ID']}</span>
+        <span class="card-name">${d['カード名']}</span>
+        <div class="card-sub-row"><span class="badge b-worker">${d['種別']}</span></div>
+      </div>
+      <div class="card-meta">
+        <span class="rar ${rarCls(d['レアリティ'])}">${d['レアリティ']}</span>
+        <span class="card-deck">×${d['デッキ枚数']}</span>
+      </div>
+    </div>
+    <div class="card-image"><div class="img-grad"></div><span class="no-img">Noimage</span></div>
+    <div class="card-markers"></div>
+    <div class="card-body">
+      <div class="card-row"><span class="row-lbl">対象</span><div class="row-val">${tag('t-target',d['対象範囲']||'—')}</div></div>
+      ${condRow}
+      <hr class="divider">
+      <div class="card-row"><span class="row-lbl">PL</span><div class="row-val">${pl.length?pl.join(''):none}</div></div>
+      <div class="card-row"><span class="row-lbl">効果</span><div class="row-val">${ef.length?ef.join(''):none}</div></div>
+      <div class="card-row"><span class="row-lbl">特殊</span><div class="row-val">${sp.length?sp.join(''):none}</div></div>
+    </div>
+    ${d['効果詳細テキスト']?`<div class="card-detail">${d['効果詳細テキスト'].replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`:''}
+  </div>`;
+}
+
+// ── トラブルカード ──────────────────────────────────
+function buildTrouble(d){
+  const icon = T_ICONS[d['カード名']] || '⚠️';
+
+  const cw=[];
+  const pm=numTag(d['プレイヤーメンタル変動'],'🧠'), pw=numTag(d['プレイヤー所持金変動'],'💰');
+  if(pm)cw.push(pm); if(pw)cw.push(pw);
+  if(d['プレイヤー手札強制捨て枚数']) cw.push(tag('t-minus',`手札 -${d['プレイヤー手札強制捨て枚数']}`));
+  if(d['プレイヤードロー数']) cw.push(tag('t-plus',`手札 +${d['プレイヤードロー数']}`));
+
+  const cs=[];
+  const cm=numTag(d['ケースメンタル変動'],'🧠'), cw2=numTag(d['ケース所持金変動'],'💰');
+  if(cm)cs.push(cm); if(cw2)cs.push(cw2);
+  if(d['ケース怒りフラグ加算']) cs.push(tag('t-special',`😠 +${d['ケース怒りフラグ加算']}`));
+  if(d['ケース不正フラグ加算']) cs.push(tag('t-special',`不正 +${d['ケース不正フラグ加算']}`));
+  if(d['病気フラグ変動']!=null) cs.push(tag(d['病気フラグ変動']<0?'t-minus':'t-special',`🦠 ${signed(d['病気フラグ変動'])}`));
+
+  const sp=[];
+  if(d['ケース失踪処理']) sp.push(tag('t-special','失踪処理'));
+  if(d['ケース種別変動']) sp.push(tag('t-special',`→${d['ケース種別変動']}`));
+  if(d['新規ケース追加枚数']) sp.push(tag('t-special',`ケース +${d['新規ケース追加枚数']}枚`));
+  if(d['監査フラグ付与']) sp.push(tag('t-special','監査フラグ'));
+
+  const tgt=[];
+  if(d['対象範囲']) tgt.push(tag('t-target',d['対象範囲']));
+  if(d['対象ケース種別']&&d['対象ケース種別']!=='全て') tgt.push(tag('t-cond',d['対象ケース種別']));
+  if(d['対象フラグ種別']) tgt.push(tag('t-cond',d['対象フラグ種別']));
+  if(d['乗算フラグ']) tgt.push(tag('t-cond','×ケース数'));
+
+  const none=tag('t-neutral','— なし —');
+  return `<div class="card card-trouble">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="card-id">ID: ${d['ID']}</span>
+        <span class="card-name">${icon} ${d['カード名']}</span>
+      </div>
+      <div class="card-meta">
+        <span class="rar ${rarCls(d['レアリティ'])}">${d['レアリティ']}</span>
+        <span class="card-deck">×${d['デッキ枚数']}</span>
+      </div>
+    </div>
+    <div class="card-image"><div class="img-grad"></div><span class="no-img">Noimage</span></div>
+    <div class="card-markers"></div>
+    <div class="card-body">
+      <div class="card-row"><span class="row-lbl">対象</span><div class="row-val">${tgt.join('')||tag('t-neutral','—')}</div></div>
+      <hr class="divider">
+      <div class="card-row"><span class="row-lbl">CW</span><div class="row-val">${cw.length?cw.join(''):none}</div></div>
+      <div class="card-row"><span class="row-lbl">ケース</span><div class="row-val">${cs.length?cs.join(''):none}</div></div>
+      <div class="card-row"><span class="row-lbl">特殊</span><div class="row-val">${sp.length?sp.join(''):none}</div></div>
+    </div>
+    ${d['効果詳細テキスト']?`<div class="card-detail">${d['効果詳細テキスト'].replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`:''}
+  </div>`;
+}
+
+// ── ケースカード ────────────────────────────────────
+function buildCase(d){
+  const typeSt = TYPE_ST[d['種別']] || 'rgba(255,255,255,.07);color:#aaa';
+  const isHard = d['種別']==='困難';
+  const pt = d['獲得ポイント']||1;
+  const sick = d['病気フラグ']||0;
+
+  const income = d['収入フラグ']==='収入あり'
+    ? `<span class="badge b-income-yes">🟡 収入あり</span>`
+    : `<span class="badge b-income-no">収入なし</span>`;
+
+  const tt=[];
+  const tw=numTag(d['ターンエンド_所持金変動'],'💰'), tm=numTag(d['ターンエンド_メンタル変動'],'🧠');
+  if(tw)tt.push(tw); if(tm)tt.push(tm);
+
+  const pl=[];
+  const pw=numTag(d['プレイヤー所持金変動'],'💰'), pm=numTag(d['プレイヤーメンタル変動'],'🧠');
+  if(pw)pl.push(pw); if(pm)pl.push(pm);
+
+  const ill=[];
+  if(d['ターンエンド_不正フラグ加算条件_所持金']!=null) ill.push(`💰≦${d['ターンエンド_不正フラグ加算条件_所持金']}`);
+  if(d['ターンエンド_不正フラグ加算条件_メンタル']!=null) ill.push(`🧠≦${d['ターンエンド_不正フラグ加算条件_メンタル']}`);
+
+  const none=tag('t-neutral','— なし —');
+  return `<div class="card card-case">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="card-id">ID: ${d['ID']}</span>
+        <span class="card-name">${d['カード名']}</span>
+        <div class="card-sub-row">
+          <span class="badge" style="background:${typeSt};">${d['種別']}</span>
+          ${income}
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-meta-top">
+          <div class="pt-badge${isHard?' hard':''}">${pt}</div>
+          <span class="rar ${rarCls(d['レアリティ'])}">${d['レアリティ']}</span>
+        </div>
+        <span class="card-deck">×${d['デッキ枚数']}</span>
+      </div>
+    </div>
+    <div class="card-image"><div class="img-grad"></div><span class="no-img">Noimage</span></div>
+    <div class="card-markers">
+      <div class="marker m-anger">
+        <span>😠</span>
+        <div class="pips"><div class="pip"></div><div class="pip"></div><div class="pip"></div></div>
+        <span>0/3</span>
+      </div>
+      ${sick>0?`<div class="marker m-sick"><span>🦠</span><span>病気 ${sick}</span></div>`:''}
+    </div>
+    <div class="card-body">
+      <div class="card-row">
+        <div class="row-val">
+          <span class="stat-box s-coin">💰 ${d['初期所持金']??'—'}</span>
+          <span class="stat-box s-mental">🧠 ${d['初期メンタル']??'—'}</span>
+          ${sick>0?`<span class="stat-box s-sick">🦠 ${sick}</span>`:''}
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="card-row"><span class="row-lbl">毎T</span><div class="row-val">${tt.length?tt.join(''):none}</div></div>
+      <div class="card-row"><span class="row-lbl">PL</span><div class="row-val">${pl.length?pl.join(''):none}</div></div>
+      <div class="card-row">
+        <span class="row-lbl">不正条件</span>
+        <div class="row-val"><span class="ill-cond">${ill.length?ill.join('　'):'なし'}</span></div>
+      </div>
+    </div>
+    ${d['効果詳細テキスト']?`<div class="card-detail">${d['効果詳細テキスト'].replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`:''}
+  </div>`;
+}
+
+// ── モーダル制御 ────────────────────────────────────
+function openW(name,txt){
+  document.getElementById('wm-title').textContent=name;
+  document.getElementById('wm-text').textContent=txt.replace(/\\n/g,'\n');
+  document.getElementById('wModal').classList.add('active');
+}
+function openC(name,txt){
+  document.getElementById('cm-title').textContent=name;
+  document.getElementById('cm-text').textContent=txt.replace(/\\n/g,'\n');
+  document.getElementById('cModal').classList.add('active');
+}
+function openT(icon,name,txt){
+  document.getElementById('tp-icon').textContent=icon;
+  document.getElementById('tp-name').textContent=name;
+  document.getElementById('tp-text').textContent=txt.replace(/\\n/g,'\n');
+  document.getElementById('tPopup').classList.add('active');
+}
+function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') ['wModal','cModal','tPopup'].forEach(closeModal); });
+
+// ── レンダリング ─────────────────────────────────────
+(function render(){
+  const gw=document.getElementById('grid-w');
+  const gt=document.getElementById('grid-t');
+  const gc=document.getElementById('grid-c');
+
+  WORKER_CARDS.forEach(d  => gw.insertAdjacentHTML('beforeend', buildWorker(d)));
+  TROUBLE_CARDS.forEach(d => gt.insertAdjacentHTML('beforeend', buildTrouble(d)));
+  CASE_CARDS.forEach(d    => gc.insertAdjacentHTML('beforeend', buildCase(d)));
+
+  const sum = arr => arr.reduce((s,d)=>s+(d['デッキ枚数']||0),0);
+  document.getElementById('cnt-w').textContent=`${WORKER_CARDS.length}種 / ${sum(WORKER_CARDS)}枚`;
+  document.getElementById('cnt-t').textContent=`${TROUBLE_CARDS.length}種 / ${sum(TROUBLE_CARDS)}枚`;
+  document.getElementById('cnt-c').textContent=`${CASE_CARDS.length}種 / ${sum(CASE_CARDS)}枚`;
+})();
+</script>
+</body>
+</html>

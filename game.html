@@ -198,6 +198,12 @@ body{font-family:'Noto Sans JP',sans-serif;color:#fff;user-select:none;}
   background:linear-gradient(135deg,#4d1b1b,#6b2d2d);
   display:flex;align-items:center;justify-content:center;
 }
+.cc-img img,.wk-img img{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:cover;
+  z-index:2;
+}
 .cc-img-grad{position:absolute;inset:0;opacity:.35;background:radial-gradient(ellipse at 40% 60%,#ef5350,transparent 55%),radial-gradient(ellipse at 75% 30%,#b71c1c,transparent 50%);}
 .cc-noimg{font-size:.5rem;opacity:.2;letter-spacing:.1em;text-transform:uppercase;z-index:1;}
 
@@ -1489,7 +1495,10 @@ function renderCases(){
     const el=document.createElement('div');
     el.className=`case-card${illGlow}${auditGlow}${tgted}`;
     el.innerHTML=`
-      <div class="cc-img"><div class="cc-img-grad"></div><span class="cc-noimg">NOIMAGE</span></div>
+      <div class="cc-img">
+        <img src="img/${d['ID']}.png" alt="" onerror="this.style.display='none'">
+        <div class="cc-img-grad"></div><span class="cc-noimg">NOIMAGE</span>
+      </div>
       <div class="cc-right">
         <div class="cc-hdr">
           <div class="cc-left">
@@ -1602,7 +1611,10 @@ function renderHand(){
           <span class="rar ${rarCls(rar)}">${rar}</span>
         </div>
       </div>
-      <div class="wk-img"><div class="wk-img-grad"></div><span class="wk-noimg">NOIMAGE</span></div>
+      <div class="wk-img">
+        <img src="img/${card['ID']}.png" alt="" onerror="this.style.display='none'">
+        <div class="wk-img-grad"></div><span class="wk-noimg">NOIMAGE</span>
+      </div>
       <div class="wk-div"></div>
       <div class="wk-body">
         <div class="wk-row">

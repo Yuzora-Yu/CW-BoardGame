@@ -58,59 +58,68 @@ body{font-family:'Noto Sans JP',sans-serif;color:#fff;user-select:none;}
 .back-link{margin-top:14px;font-size:.72rem;color:#444;cursor:pointer;text-decoration:underline;}
 
 /* ════════════════════════════════════════
-   GAME SCREEN LAYOUT
+   GAME SCREEN LAYOUT — flex column dvh
+   .screen が position:absolute;inset:0;display:flex;flex-direction:column を提供
+   各子要素が dvh で高さを持つ
 ════════════════════════════════════════ */
 #scn-game{
   background:var(--bg);
   background-image:radial-gradient(ellipse at 20% 20%,#0d1f0d,transparent 50%),
                    radial-gradient(ellipse at 80% 80%,#1a0d0d,transparent 50%);
-  padding:0;justify-content:flex-start;align-items:stretch;overflow:hidden;
+  padding:0;
+  flex-direction:column;
+  justify-content:flex-start;
+  align-items:stretch;
+  overflow:hidden;
 }
 
-/* ── ① ステータスバー（最上部） ── */
+/* ── ① ステータスバー（25dvh） ── */
 .status-bar{
   flex-shrink:0;
-  background:rgba(0,0,0,.7);backdrop-filter:blur(10px);
+  height:25vh; height:25dvh;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(10px);
   border-bottom:1px solid #1f1f1f;
   padding:0 10px;
+  overflow:hidden;
+  display:flex;flex-direction:column;justify-content:space-between;
 }
 .status-row1{
-  display:flex;align-items:center;gap:6px;padding:8px 0 4px;
+  display:flex;align-items:center;gap:6px;padding:6px 0 2px;
 }
-.sb-back{background:none;border:1px solid #2a2a2a;color:#555;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.7rem;font-family:'Noto Sans JP',sans-serif;flex-shrink:0;}
-.sb-mode{font-size:.62rem;color:#444;flex:1;text-align:right;letter-spacing:.05em;}
-.sb-turn{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.1em;color:#666;flex-shrink:0;}
+.sb-back{background:none;border:1px solid #2a2a2a;color:#555;padding:3px 8px;border-radius:6px;cursor:pointer;font-size:.68rem;font-family:'Noto Sans JP',sans-serif;flex-shrink:0;}
+.sb-mode{font-size:.6rem;color:#444;flex:1;text-align:right;letter-spacing:.04em;}
+.sb-turn{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;color:#666;flex-shrink:0;}
 
 /* スコア＆ステータスパネル */
 .status-row2{
-  display:flex;gap:6px;padding:4px 0 8px;align-items:stretch;
+  display:flex;gap:5px;padding:2px 0 2px;align-items:stretch;flex:1;min-height:0;
 }
 /* ポイント（大きく） */
 .stat-pt{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   background:linear-gradient(135deg,rgba(212,160,23,.18),rgba(212,160,23,.06));
-  border:1px solid rgba(212,160,23,.3);border-radius:10px;
-  padding:6px 14px;min-width:64px;
+  border:1px solid rgba(212,160,23,.3);border-radius:8px;
+  padding:4px 10px;min-width:54px;
 }
-.stat-pt .sv{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--yellow);line-height:1;}
-.stat-pt .sl{font-size:.55rem;color:rgba(255,224,130,.5);letter-spacing:.12em;margin-top:2px;}
+.stat-pt .sv{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.2rem,4vh,1.8rem);color:var(--yellow);line-height:1;}
+.stat-pt .sl{font-size:.5rem;color:rgba(255,224,130,.5);letter-spacing:.1em;margin-top:1px;}
 
 /* コイン・メンタル */
 .stat-pair{
-  display:flex;gap:5px;flex:1;
+  display:flex;gap:4px;flex:1;
 }
 .stat-block{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  border-radius:10px;padding:5px 4px;
+  border-radius:8px;padding:3px 4px;
 }
 .stat-block.s-coin{background:rgba(255,193,7,.1);border:1px solid rgba(255,193,7,.22);}
 .stat-block.s-mental{background:rgba(33,150,243,.1);border:1px solid rgba(33,150,243,.22);}
 .stat-block.s-mental.low{background:rgba(229,57,53,.12);border-color:rgba(229,57,53,.3);}
-.stat-block .sv{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;line-height:1;}
+.stat-block .sv{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.1rem,3.5vh,1.5rem);line-height:1;}
 .stat-block.s-coin .sv{color:var(--yellow);}
 .stat-block.s-mental .sv{color:var(--blue);}
 .stat-block.s-mental.low .sv{color:var(--red-l);}
-.stat-block .sl{font-size:.5rem;letter-spacing:.08em;margin-top:1px;opacity:.5;}
+.stat-block .sl{font-size:.46rem;letter-spacing:.07em;margin-top:1px;opacity:.5;}
 
 /* フラグ欄 */
 .stat-flags{
@@ -125,76 +134,107 @@ body{font-family:'Noto Sans JP',sans-serif;color:#fff;user-select:none;}
 /* アクション情報 */
 .status-row3{
   display:flex;align-items:center;justify-content:space-between;
-  padding:5px 0 7px;border-top:1px solid #1a1a1a;
+  padding:3px 0 5px;border-top:1px solid #1a1a1a;
 }
-.phase-info{font-size:.7rem;color:#aaa;font-weight:700;}
-.action-count{
-  font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.05em;
-  color:var(--green-l);
-}
+.phase-info{font-size:.66rem;color:#aaa;font-weight:700;}
+.action-count{font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:.05em;color:var(--green-l);}
 .action-count.zero{color:#555;}
-.phase-btn{padding:5px 14px;border-radius:7px;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.72rem;}
+.phase-btn{padding:4px 12px;border-radius:7px;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.7rem;}
 .pb-end{background:rgba(229,57,53,.15);color:var(--red-l);border:1px solid rgba(229,57,53,.3);}
 .pb-end:disabled{opacity:.3;cursor:not-allowed;}
 .pb-next{background:rgba(76,175,80,.15);color:var(--green-l);border:1px solid rgba(76,175,80,.3);}
 
-/* ── ② ケースエリア（中央・スクロール可） ── */
+/* ── ② ケースエリア（30dvh） ── */
 .cases-area{
-  flex:1;overflow-y:auto;overflow-x:hidden;
-  padding:10px;
-  display:flex;flex-direction:column;gap:8px;
-  -webkit-overflow-scrolling:touch;
+  flex-shrink:0;
+  height:30vh; height:30dvh;
+  overflow-y:hidden;overflow-x:hidden;
+  padding:6px 8px 4px;
+  display:flex;flex-direction:column;gap:4px;
 }
-.cases-label{font-size:.6rem;color:#444;letter-spacing:.14em;text-transform:uppercase;margin-bottom:2px;}
+.cases-label{font-size:.6rem;color:#444;letter-spacing:.14em;text-transform:uppercase;margin-bottom:2px;flex-shrink:0;}
+/* 横スクロール1行グリッド */
 .cases-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-  gap:8px;
+  display:flex;
+  flex-direction:row;
+  gap:6px;
+  flex:1;
+  min-height:0;
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;scrollbar-color:#222 transparent;
+  align-items:stretch;
 }
+.cases-grid::-webkit-scrollbar{height:3px;}
+.cases-grid::-webkit-scrollbar-thumb{background:#222;border-radius:2px;}
 
-/* ── ケースカード（sample.html準拠） ── */
+/* ── ケースカード（横向きlandscape・画像左＋情報右） ── */
 .case-card{
   background:linear-gradient(160deg,var(--red-d),#1f0f0f);
-  border:2px solid var(--red-b);border-radius:12px;
+  border:2px solid var(--red-b);border-radius:10px;
   cursor:pointer;transition:transform .15s,box-shadow .15s;
-  overflow:hidden;position:relative;
+  overflow:hidden;
+  /* 横向き固定幅：スマホで画面幅の90%、PCで最大340px */
+  min-width:min(270px,82vw);
+  max-width:min(320px,88vw);
+  flex-shrink:0;
+  /* 横向き：左に画像、右に情報 */
+  display:flex;flex-direction:row;
+  height:100%;
 }
-.case-card:active{transform:scale(.97);}
+.case-card:active{transform:scale(.98);}
 .case-card.targeted{border-color:var(--green-m)!important;box-shadow:0 0 14px rgba(76,175,80,.45);}
 .case-card.illegal-glow{border-color:var(--red-m)!important;box-shadow:0 0 10px rgba(229,57,53,.35);}
 .case-card.audit-glow{animation:auditPulse 1s infinite;}
 @keyframes auditPulse{0%,100%{box-shadow:0 0 8px rgba(255,87,34,.4);}50%{box-shadow:0 0 20px rgba(255,87,34,.7);}}
 
+/* ── ケースカード：左画像エリア ── */
+.cc-img{
+  width:clamp(70px,20vw,90px);
+  flex-shrink:0;
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(135deg,#4d1b1b,#6b2d2d);
+  display:flex;align-items:center;justify-content:center;
+}
+.cc-img-grad{position:absolute;inset:0;opacity:.35;background:radial-gradient(ellipse at 40% 60%,#ef5350,transparent 55%),radial-gradient(ellipse at 75% 30%,#b71c1c,transparent 50%);}
+.cc-noimg{font-size:.5rem;opacity:.2;letter-spacing:.1em;text-transform:uppercase;z-index:1;}
+
+/* ── ケースカード：右情報エリア ── */
+.cc-right{
+  flex:1;min-width:0;
+  display:flex;flex-direction:column;
+  padding:6px 8px 5px;
+  gap:2px;
+  overflow:hidden;
+}
+
 /* ケースカードヘッダー */
-.cc-hdr{padding:8px 10px 5px;display:flex;align-items:flex-start;justify-content:space-between;gap:4px;}
-.cc-left{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
-.cc-id{font-size:.55rem;opacity:.35;font-family:'Bebas Neue',sans-serif;letter-spacing:.08em;}
-.cc-name{font-size:.82rem;font-weight:700;color:var(--red-l);line-height:1.2;}
+.cc-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:3px;flex-shrink:0;}
+.cc-left{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;}
+.cc-id{font-size:.5rem;opacity:.3;font-family:'Bebas Neue',sans-serif;letter-spacing:.08em;}
+.cc-name{font-size:clamp(.68rem,.18vw+.63rem,.78rem);font-weight:700;color:var(--red-l);line-height:1.2;}
 .cc-sub{display:flex;gap:3px;align-items:center;margin-top:2px;flex-wrap:wrap;}
-.cc-meta{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
+.cc-meta{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;}
 .cc-meta-top{display:flex;align-items:center;gap:3px;}
 
 /* ポイントバッジ */
-.pt-badge{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#d4a017,#f5c842);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.78rem;color:#1a1000;box-shadow:0 2px 6px rgba(212,160,23,.5);}
-.pt-badge.hard{background:linear-gradient(135deg,#e53935,#ff7043);color:#fff;box-shadow:0 2px 6px rgba(229,57,53,.5);}
-.rar{font-family:'Bebas Neue',sans-serif;font-size:.68rem;padding:1px 4px;border-radius:3px;line-height:1.5;}
+.pt-badge{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#d4a017,#f5c842);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.72rem;color:#1a1000;box-shadow:0 2px 5px rgba(212,160,23,.5);}
+.pt-badge.hard{background:linear-gradient(135deg,#e53935,#ff7043);color:#fff;box-shadow:0 2px 5px rgba(229,57,53,.5);}
+.rar{font-family:'Bebas Neue',sans-serif;font-size:.65rem;padding:1px 4px;border-radius:3px;line-height:1.5;}
 .r-ur{background:var(--ur-bg);color:var(--ur-c);border:1px solid var(--ur-bd);}
 .r-sr{background:var(--sr-bg);color:var(--sr-c);border:1px solid var(--sr-bd);}
 .r-r{background:var(--r-bg);color:var(--r-c);border:1px solid var(--r-bd);}
 
 /* バッジ系 */
-.bdg{font-size:.56rem;padding:1px 4px;border-radius:3px;line-height:1.5;}
+.bdg{font-size:.52rem;padding:1px 3px;border-radius:3px;line-height:1.5;}
 .bdg-income-no{background:rgba(255,255,255,.04);color:#555;border:1px solid rgba(255,255,255,.07);}
 .bdg-income-yes{background:rgba(255,193,7,.15);color:#ffd54f;border:1px solid rgba(255,193,7,.3);}
 
-/* ケースカード画像エリア */
-.cc-img{height:70px;margin:0 8px;border-radius:6px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#4d1b1b,#6b2d2d);}
-.cc-img-grad{position:absolute;inset:0;opacity:.3;background:radial-gradient(ellipse at 40% 60%,#ef5350,transparent 55%),radial-gradient(ellipse at 75% 30%,#b71c1c,transparent 50%);}
-.cc-noimg{font-size:.58rem;opacity:.2;letter-spacing:.12em;text-transform:uppercase;z-index:1;}
-
 /* マーカー */
-.cc-markers{display:flex;gap:3px;padding:5px 8px 3px;flex-wrap:wrap;min-height:24px;}
-.mk{display:flex;align-items:center;gap:2px;font-size:.56rem;padding:1px 4px;border-radius:3px;line-height:1;}
+.cc-markers{display:flex;gap:2px;flex-wrap:wrap;flex-shrink:0;}
+.mk{display:flex;align-items:center;gap:2px;font-size:.52rem;padding:1px 3px;border-radius:3px;line-height:1;}
 .mk-anger{background:rgba(255,87,34,.17);border:1px solid rgba(255,87,34,.34);color:#ff8a65;}
 .mk-illegal{background:rgba(244,67,54,.18);border:1px solid rgba(244,67,54,.36);color:var(--red-l);}
 .mk-sick{background:rgba(156,204,101,.12);border:1px solid rgba(156,204,101,.3);color:#aed581;}
@@ -203,19 +243,19 @@ body{font-family:'Noto Sans JP',sans-serif;color:#fff;user-select:none;}
 .mk-mgmt{background:rgba(255,193,7,.12);border:1px solid rgba(255,193,7,.3);color:var(--yellow);}
 .mk-ind{background:rgba(76,175,80,.14);border:1px solid rgba(76,175,80,.3);color:var(--green-l);}
 .pips{display:flex;gap:2px;align-items:center;}
-.pip{width:6px;height:6px;border-radius:50%;border:1px solid rgba(255,87,34,.4);}
+.pip{width:5px;height:5px;border-radius:50%;border:1px solid rgba(255,87,34,.4);}
 .pip.on{background:#ff5722;border-color:#ff5722;}
 
 /* ケースカード下部 */
-.cc-body{padding:4px 8px 8px;display:flex;flex-direction:column;gap:3px;}
-.cc-stats-row{display:flex;gap:4px;}
-.cc-stat{display:flex;align-items:center;gap:2px;font-size:.64rem;padding:2px 5px;border-radius:4px;}
+.cc-body{display:flex;flex-direction:column;gap:2px;flex:1;min-height:0;}
+.cc-stats-row{display:flex;gap:3px;}
+.cc-stat{display:flex;align-items:center;gap:2px;font-size:.6rem;padding:2px 4px;border-radius:4px;}
 .cs-coin{background:rgba(255,193,7,.1);color:var(--yellow);border:1px solid rgba(255,193,7,.2);}
 .cs-mental{background:rgba(33,150,243,.1);color:var(--blue);border:1px solid rgba(33,150,243,.2);}
 .cs-sick{background:rgba(156,204,101,.1);color:#aed581;border:1px solid rgba(156,204,101,.2);}
-.cc-divider{height:1px;background:rgba(229,57,53,.15);margin:2px 0;}
-.cc-effects{display:flex;gap:3px;flex-wrap:wrap;}
-.tag{font-size:.57rem;padding:1px 4px;border-radius:3px;white-space:nowrap;line-height:1.6;font-weight:500;}
+.cc-divider{height:1px;background:rgba(229,57,53,.15);margin:2px 0;flex-shrink:0;}
+.cc-effects{display:flex;gap:2px;flex-wrap:wrap;}
+.tag{font-size:.52rem;padding:1px 3px;border-radius:3px;white-space:nowrap;line-height:1.6;font-weight:500;}
 .t-plus{background:rgba(76,175,80,.13);color:var(--green-l);border:1px solid rgba(76,175,80,.26);font-weight:700;}
 .t-minus{background:rgba(229,57,53,.13);color:var(--red-l);border:1px solid rgba(229,57,53,.26);font-weight:700;}
 .t-neutral{background:rgba(255,255,255,.05);color:#bbb;border:1px solid rgba(255,255,255,.09);}
@@ -224,86 +264,113 @@ body{font-family:'Noto Sans JP',sans-serif;color:#fff;user-select:none;}
 .t-cond{background:rgba(255,193,7,.1);color:var(--yellow);border:1px solid rgba(255,193,7,.2);}
 .ill-cond{font-size:.55rem;color:var(--red-l);opacity:.7;padding:1px 4px;border-radius:3px;border:1px dashed rgba(229,57,53,.26);background:rgba(229,57,53,.04);}
 
-/* ── ③ 手札エリア（画面最下部） ── */
+/* ── ③ 手札エリア（35dvh） ── */
 .hand-area{
   flex-shrink:0;
-  background:rgba(0,0,0,.5);backdrop-filter:blur(8px);
+  height:35vh; height:35dvh;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(8px);
   border-top:1px solid #1a1a1a;
-  padding-bottom:env(safe-area-inset-bottom);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  display:flex;flex-direction:column;
+  overflow:hidden;
 }
 .hand-header{
+  flex-shrink:0;
   display:flex;align-items:center;justify-content:space-between;
-  padding:6px 12px 4px;
+  padding:4px 8px 3px;
+  border-bottom:1px solid #1a1a1a;
 }
-.hand-title{font-size:.62rem;color:#444;letter-spacing:.12em;text-transform:uppercase;}
-.hand-meta{display:flex;align-items:center;gap:8px;}
-.hand-count{font-size:.62rem;color:#444;}
+.hand-title{font-size:.58rem;color:#444;letter-spacing:.12em;text-transform:uppercase;}
+.hand-meta{display:flex;align-items:center;gap:5px;}
+.hand-count{font-size:.58rem;color:#444;}
 .hand-draw-btn{
-  padding:4px 12px;border-radius:6px;border:1px solid rgba(255,193,7,.28);
+  padding:3px 9px;border-radius:5px;border:1px solid rgba(255,193,7,.28);
   background:rgba(255,193,7,.1);color:var(--yellow);
-  font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.68rem;cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.62rem;cursor:pointer;
 }
 .hand-draw-btn:disabled{opacity:.25;cursor:not-allowed;}
 .hand-end-btn{
-  padding:4px 12px;border-radius:6px;border:1px solid rgba(229,57,53,.28);
+  padding:3px 9px;border-radius:5px;border:1px solid rgba(229,57,53,.28);
   background:rgba(229,57,53,.1);color:var(--red-l);
-  font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.68rem;cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.62rem;cursor:pointer;
 }
 .hand-end-btn:disabled{opacity:.25;cursor:not-allowed;}
 .hand-cancel-btn{
-  padding:4px 10px;border-radius:6px;border:1px solid #2a2a2a;
+  padding:3px 8px;border-radius:5px;border:1px solid #2a2a2a;
   background:rgba(255,255,255,.04);color:#555;
-  font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.65rem;cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.6rem;cursor:pointer;
 }
-
 .hand-scroll{
-  display:flex;gap:8px;overflow-x:auto;
-  padding:0 10px 10px;
+  flex:1;display:flex;gap:5px;overflow-x:auto;
+  padding:5px 8px 6px;
+  align-items:stretch;
   -webkit-overflow-scrolling:touch;
-  scrollbar-width:thin;scrollbar-color:#1a1a1a transparent;
+  scrollbar-width:thin;scrollbar-color:#222 transparent;
 }
 .hand-scroll::-webkit-scrollbar{height:3px;}
-.hand-scroll::-webkit-scrollbar-thumb{background:#1a1a1a;border-radius:2px;}
+.hand-scroll::-webkit-scrollbar-thumb{background:#222;border-radius:2px;}
 
-/* ── ワーカーカード（手札・sample準拠） ── */
+/* ── ワーカーカード：画像なし・高さをdvhに合わせる ── */
 .wk-card{
   background:linear-gradient(160deg,var(--green-d),#0f1f0f);
-  border:2px solid var(--green-b);border-radius:11px;
-  min-width:130px;max-width:140px;flex-shrink:0;
-  cursor:pointer;transition:transform .15s,box-shadow .15s;
-  overflow:hidden;position:relative;
+  border:2px solid var(--green-b);border-radius:9px;
+  /* 横：スマホ〜PCで32vw〜130pxに収める */
+  min-width:min(110px,32vw);
+  max-width:min(126px,35vw);
+  flex-shrink:0;
+  cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+  overflow:hidden;
+  display:flex;flex-direction:column;
 }
 .wk-card:active{transform:scale(.96);}
 .wk-card.selected{
   border-color:#ffcc02!important;
-  box-shadow:0 0 16px rgba(255,204,2,.5);
-  transform:translateY(-8px);
+  box-shadow:0 0 12px rgba(255,204,2,.5);
+  transform:translateY(-5px);
 }
-.wk-card.unusable{opacity:.35;cursor:not-allowed;}
-.wk-hdr{padding:7px 9px 4px;display:flex;align-items:flex-start;justify-content:space-between;gap:4px;}
+.wk-card.unusable{opacity:.45;}
+.wk-hdr{
+  padding:5px 6px 2px;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:3px;
+  flex-shrink:0;
+}
 .wk-left{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;}
-.wk-id{font-size:.55rem;opacity:.35;font-family:'Bebas Neue',sans-serif;letter-spacing:.08em;}
-.wk-name{font-size:.78rem;font-weight:700;color:var(--green-l);line-height:1.2;}
-.wk-sub{display:flex;gap:3px;margin-top:2px;flex-wrap:wrap;}
+.wk-id{font-size:.48rem;opacity:.3;font-family:'Bebas Neue',sans-serif;letter-spacing:.05em;}
+.wk-name{
+  font-size:clamp(.6rem,1.8vh,.72rem);font-weight:700;color:var(--green-l);line-height:1.2;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.wk-sub{display:flex;gap:2px;margin-top:1px;flex-wrap:wrap;}
 .wk-meta{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;}
-.bdg-type-w{font-size:.54rem;padding:1px 4px;border-radius:3px;background:rgba(76,175,80,.18);color:#81c784;line-height:1.5;}
-.wk-body{padding:3px 9px 7px;display:flex;flex-direction:column;gap:3px;}
-.wk-row{display:flex;gap:3px;flex-wrap:wrap;}
-.wk-img{height:60px;margin:0 7px;border-radius:5px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1b4d1b,#2d6b2d);}
-.wk-img-grad{position:absolute;inset:0;opacity:.28;background:radial-gradient(ellipse at 30% 60%,#66bb6a,transparent 55%),radial-gradient(ellipse at 80% 30%,#388e3c,transparent 50%);}
-.wk-noimg{font-size:.55rem;opacity:.2;letter-spacing:.12em;text-transform:uppercase;z-index:1;}
+.bdg-type-w{font-size:.48rem;padding:1px 3px;border-radius:3px;background:rgba(76,175,80,.18);color:#81c784;line-height:1.5;}
+.wk-div{height:1px;background:rgba(76,175,80,.12);margin:0 5px;flex-shrink:0;}
+/* ワーカーカード小画像エリア */
+.wk-img{
+  height:clamp(32px,4vh,44px);
+  margin:0 5px;border-radius:4px;overflow:hidden;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#1b4d1b,#2d6b2d);
+  flex-shrink:0;
+}
+.wk-img-grad{position:absolute;inset:0;opacity:.25;background:radial-gradient(ellipse at 30% 60%,#66bb6a,transparent 55%),radial-gradient(ellipse at 80% 30%,#388e3c,transparent 50%);}
+.wk-noimg{font-size:.48rem;opacity:.18;letter-spacing:.1em;text-transform:uppercase;z-index:1;}
+.wk-body{padding:2px 6px 4px;display:flex;flex-direction:column;gap:2px;flex:1;overflow:hidden;}
+.wk-row{display:flex;gap:2px;flex-wrap:wrap;}
 
 /* ════════════════════════════════════════
-   LOG
+   LOG（10dvh）
 ════════════════════════════════════════ */
 .log-area{
-  flex-shrink:0;height:72px;overflow-y:auto;
-  padding:4px 12px;background:rgba(0,0,0,.25);
+  flex-shrink:0;
+  height:10vh; height:10dvh;
+  overflow-y:auto;
+  padding:4px 12px;background:rgba(0,0,0,.3);
   border-top:1px solid #151515;
   scrollbar-width:none;
 }
 .log-area::-webkit-scrollbar{display:none;}
-.log-line{font-size:.63rem;color:#555;padding:1px 0;line-height:1.5;}
+.log-line{font-size:.6rem;color:#555;padding:1px 0;line-height:1.4;}
 .log-line.lc-good{color:var(--green-l);}
 .log-line.lc-danger{color:var(--red-l);}
 .log-line.lc-info{color:var(--yellow);}
@@ -401,7 +468,7 @@ body{font-family:'Noto Sans JP',sans-serif;color:#fff;user-select:none;}
 <!-- ══════════════════════════════
      GAME SCREEN
 ══════════════════════════════ -->
-<div class="screen hidden" id="scn-game" style="padding:0;position:relative;">
+<div class="screen hidden" id="scn-game" style="padding:0;">
 
   <!-- ① ステータスバー -->
   <div class="status-bar">
@@ -539,6 +606,52 @@ body{font-family:'Noto Sans JP',sans-serif;color:#fff;user-select:none;}
   </div>
 </div>
 
+<!-- 自立ポップアップ -->
+<div class="ind-popup hidden" id="ind-popup">
+  <div class="ind-box">
+    <div class="ind-sparkle">🎉</div>
+    <div class="ind-case-name" id="ind-case-name">—</div>
+    <div class="ind-title">自立廃止！</div>
+    <div class="ind-pt" id="ind-pt">+1</div>
+    <div class="ind-pt-label">POINT</div>
+    <div class="ind-total" id="ind-total">累計 0 pt</div>
+    <button class="ind-btn" onclick="closeIndPopup()">確認 ✓</button>
+  </div>
+</div>
+
+<style>
+/* 自立ポップアップ */
+.ind-popup{
+  position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);
+  z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.ind-popup.hidden{display:none!important;}
+.ind-box{
+  background:#0d1a0d;border:2px solid var(--green-b);border-radius:18px;
+  padding:28px 24px;max-width:300px;width:100%;text-align:center;
+  animation:indIn .25s cubic-bezier(.17,.67,.34,1.3);
+  box-shadow:0 0 60px rgba(76,175,80,.35);
+}
+@keyframes indIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+.ind-sparkle{font-size:2.8rem;margin-bottom:6px;display:inline-block;animation:sparkSpin .8s ease infinite alternate;}
+@keyframes sparkSpin{from{transform:scale(1) rotate(-5deg);}to{transform:scale(1.18) rotate(5deg);}}
+.ind-case-name{font-size:.78rem;color:#666;margin-bottom:4px;}
+.ind-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.12em;color:var(--green-l);margin-bottom:8px;}
+.ind-pt{
+  font-family:'Bebas Neue',sans-serif;font-size:3.5rem;letter-spacing:.05em;
+  color:var(--yellow);line-height:1;
+  text-shadow:0 0 30px rgba(255,224,130,.5);
+}
+.ind-pt-label{font-size:.65rem;color:#555;margin-bottom:6px;letter-spacing:.1em;}
+.ind-total{font-size:.88rem;color:var(--green-l);margin-bottom:20px;font-weight:700;}
+.ind-btn{
+  background:linear-gradient(135deg,var(--green-d),#0f2f0f);
+  border:2px solid var(--green-b);color:var(--green-l);
+  padding:10px 32px;border-radius:10px;cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:.88rem;
+}
+</style>
+
 <!-- ════════════════════════════════════════
      GAME LOGIC
 ════════════════════════════════════════ -->
@@ -644,8 +757,7 @@ function drawWorker(n=1){
       G.wDeck=shuffle([...G.wDiscard]);G.wDiscard=[];
       addLog('ワーカー山札リシャッフル');
     }
-    if(G.hand.length<7)G.hand.push(G.wDeck.shift());
-    else G.wDiscard.push(G.wDeck.shift()); // 上限超えは捨て
+    G.hand.push(G.wDeck.shift()); // 上限チェックは呼び出し元のcheckHandLimitに委ねる
   }
 }
 function drawCase(){
@@ -680,7 +792,7 @@ function startTurn(){
 function doRecovery(){
   G.phase='recovery';
   if(G.isSick){G.coins+=1;addLog('回復：💰+1（病気中）');}
-  else{G.coins+=3;G.mental=clamp(G.mental+1,0,99);addLog('回復：💰+3 🧠+1','good');}
+  else{G.coins+=3;addLog('回復：💰+3','good');}
   doCaseStats();
 }
 function doCaseStats(){
@@ -709,8 +821,8 @@ function showTrouble(){
   const card=drawTrouble();
   if(!card){doCaseAdd();return;}
   G.tDiscard.push(card);
-  applyTrouble(card);
-  if(G.phase==='gameOver')return;
+  G._pendingTroubleCard=card;
+  // まずモーダル表示
   document.getElementById('mt-icon').textContent=TROUBLE_ICONS[card['カード名']]||'⚠️';
   document.getElementById('mt-name').textContent=card['カード名'];
   document.getElementById('mt-text').textContent=card['効果詳細テキスト']||'';
@@ -719,7 +831,14 @@ function showTrouble(){
 function closeTroubleModal(){
   closeModal('modal-trouble');
   if(G.phase==='gameOver')return;
-  doCaseAdd();
+  // 効果を適用（手札捨てが必要な場合は選択モーダルが出て、完了後doCaseAdd）
+  const card=G._pendingTroubleCard;
+  G._pendingTroubleCard=null;
+  if(!card){doCaseAdd();return;}
+  applyTrouble(card,()=>{
+    if(G.phase==='gameOver')return;
+    doCaseAdd();
+  });
 }
 function doCaseAdd(){
   G.phase='addCase';
@@ -768,10 +887,30 @@ function runTurnEnd(){
   for(let i=G.cases.length-1;i>=0;i--){
     if(G.cases[i].angerFlags>=3){addLog(`「${G.cases[i].data['カード名']}」怒り3→困難変化！`,'danger');transformCase(i,1019);}
   }
-  // ④自立判定
+  // ④自立判定（困難ケースは indFlag 専用カード使用時のみ自立可能）
+  G._indQueue=[];
   for(let i=G.cases.length-1;i>=0;i--){
-    if(G.cases[i].curCoins>=5||G.cases[i].indFlag)resolveCase(i,'independence');
+    const cs=G.cases[i];
+    const isHard=cs.data['種別']==='困難';
+    // 困難ケース：indFlag のみ自立。coins>=5 では自立しない
+    // 通常等：coins>=5 または indFlag で自立
+    if(isHard ? cs.indFlag : (cs.curCoins>=5||cs.indFlag)){
+      resolveCase(i,'independence');
+    }
   }
+  // 自立ポップアップがあれば表示（確認後に⑤以降を継続）
+  if(G._indQueue&&G._indQueue.length>0){
+    render();
+    flushIndQueue(()=>{
+      afterIndQueue();
+    });
+    return;
+  }
+  afterIndQueue();
+}
+
+// ⑤〜⑦：自立ポップアップ確認後に呼ばれる
+function afterIndQueue(){
   if(checkWin())return;
   // ⑤監査判定
   if(G.auditFlag){
@@ -788,12 +927,41 @@ function runTurnEnd(){
 }
 
 // ─────────────────────────────────────────
+// INDEPENDENCE POPUP QUEUE
+// ─────────────────────────────────────────
+function flushIndQueue(cb){
+  G._indCb=cb;
+  showNextInd();
+}
+function showNextInd(){
+  if(!G._indQueue||!G._indQueue.length){
+    const cb=G._indCb;G._indCb=null;
+    if(cb)cb();
+    return;
+  }
+  const item=G._indQueue.shift();
+  const isHard=item.pt===2;
+  document.getElementById('ind-case-name').textContent=item.name;
+  document.getElementById('ind-pt').textContent=`+${item.pt}`;
+  document.getElementById('ind-pt').style.color=isHard?'var(--orange)':'var(--yellow)';
+  document.getElementById('ind-total').textContent=`累計 ${item.total} pt`;
+  // sparkleアイコンを困難は🌟に
+  document.querySelector('.ind-sparkle').textContent=isHard?'🌟':'🎉';
+  document.getElementById('ind-popup').classList.remove('hidden');
+  render();
+}
+function closeIndPopup(){
+  document.getElementById('ind-popup').classList.add('hidden');
+  showNextInd();
+}
+
+// ─────────────────────────────────────────
 // ROULETTE
 // ─────────────────────────────────────────
 function showRoulette(){
   const opts=[
-    {label:'何もなし',icon:'😌',fn:()=>({detail:'何も起きなかった。'})},
-    {label:'困窮ケース判定',icon:'💸',fn:()=>{
+    {label:'何もなし',icon:'😌',fn:(_cb)=>({detail:'何も起きなかった。'})},
+    {label:'困窮ケース判定',icon:'💸',fn:(_cb)=>{
       const d=[];
       for(let i=G.cases.length-1;i>=0;i--){
         const cs=G.cases[i];
@@ -803,7 +971,7 @@ function showRoulette(){
       }
       return{detail:d.join('\n')||'該当ケースなし'};
     }},
-    {label:'精神ケース判定',icon:'😰',fn:()=>{
+    {label:'精神ケース判定',icon:'😰',fn:(_cb)=>{
       const d=[];
       for(let i=G.cases.length-1;i>=0;i--){
         const cs=G.cases[i];
@@ -813,7 +981,7 @@ function showRoulette(){
       }
       return{detail:d.join('\n')||'該当ケースなし'};
     }},
-    {label:'暴力ケース判定',icon:'👊',fn:()=>{
+    {label:'暴力ケース判定',icon:'👊',fn:(_cb)=>{
       const d=[];
       G.cases.forEach(cs=>{
         if(cs.data['種別']!=='暴力')return;
@@ -821,10 +989,20 @@ function showRoulette(){
       });
       return{detail:d.join('\n')||'該当ケースなし'};
     }},
-    {label:'トラブル追加',icon:'⚡',fn:()=>{
+    {label:'トラブル追加',icon:'⚡',fn:(cb)=>{
       const ex=drawTrouble();
-      if(ex){G.tDiscard.push(ex);applyTrouble(ex);return{detail:`「${ex['カード名']}」が追加発動！\n${ex['効果詳細テキスト']||''}`};}
-      return{detail:'トラブル山札が空でした'};
+      if(ex){
+        G.tDiscard.push(ex);
+        const detail=`「${ex['カード名']}」が追加発動！\n${ex['効果詳細テキスト']||''}`;
+        document.getElementById('rl-detail').textContent=detail;
+        document.getElementById('rl-ok').disabled=false;
+        addLog(`ルーレット追加：${ex['カード名']}`);
+        applyTrouble(ex,cb);
+      } else {
+        document.getElementById('rl-detail').textContent='トラブル山札が空でした';
+        document.getElementById('rl-ok').disabled=false;
+        if(cb)cb();
+      }
     }},
   ];
   const roll=0|Math.random()*5;
@@ -841,10 +1019,15 @@ function showRoulette(){
       clearInterval(timer);
       document.getElementById('rl-wheel').textContent=chosen.icon;
       document.getElementById('rl-result').textContent=chosen.label;
-      const res=chosen.fn();
-      document.getElementById('rl-detail').textContent=res.detail;
-      document.getElementById('rl-ok').disabled=false;
       addLog(`ルーレット：${chosen.label}`);
+      // トラブル追加はfnがコールバックを管理
+      if(chosen.label==='トラブル追加'){
+        chosen.fn(null); // rlOkは内部でdisabledを解除
+      } else {
+        const res=chosen.fn(null);
+        document.getElementById('rl-detail').textContent=res?res.detail||'':'';
+        document.getElementById('rl-ok').disabled=false;
+      }
     }
   },75);
 }
@@ -877,7 +1060,11 @@ function resolveCase(idx,reason){
   const name=cs.data['カード名'];
   if(reason==='independence'){
     const pt=cs.data['種別']==='困難'?2:1;
-    G.points+=pt;addLog(`「${name}」自立廃止 +${pt}pt（計${G.points}pt）`,'good');
+    G.points+=pt;
+    addLog(`「${name}」自立廃止 +${pt}pt（計${G.points}pt）`,'good');
+    // ポップアップキューに積む（呼び出し元がキューをflushする）
+    G._indQueue=G._indQueue||[];
+    G._indQueue.push({name,pt,total:G.points});
   } else if(reason==='death'){
     G.points=Math.max(0,G.points-1);G.mental=Math.max(1,G.mental-1);
     addLog(`「${name}」死亡 PT-1 PL🧠-1`,'danger');
@@ -911,7 +1098,7 @@ function updateSick(){
 // ─────────────────────────────────────────
 // TROUBLE APPLICATION
 // ─────────────────────────────────────────
-function applyTrouble(card){
+function applyTrouble(card, cb){
   addLog(`トラブル「${card['カード名']}」発動`,'danger');
   const pm=card['プレイヤーメンタル変動']||0;
   const pw=card['プレイヤー所持金変動']||0;
@@ -928,7 +1115,7 @@ function applyTrouble(card){
   const multi=card['乗算フラグ'];
   const auditF=card['監査フラグ付与'];
 
-  // プレイヤー影響
+  // プレイヤー影響（メンタル）
   if(pm!==0){
     if(auditF){
       const hasIll=G.cases.some(cs=>cs.illegalFlags>0);
@@ -943,11 +1130,13 @@ function applyTrouble(card){
       if(pm<0)addLog(`PL🧠${signed(pm*cnt)}`,'danger');
     }
   }
-  if(pw!==0&&!auditF){const cnt=multi?G.cases.length:1;G.coins=Math.max(0,G.coins+pw*cnt);if(pw<0)addLog(`PL💰${signed(pw*cnt)}`,'danger');}
-  if(ph>0){
-    const n=Math.min(ph,G.hand.length);
-    if(n>0){const idxs=shuffle([...Array(G.hand.length).keys()]).slice(0,n);idxs.sort((a,b)=>b-a).forEach(i=>G.wDiscard.push(...G.hand.splice(i,1)));addLog(`手札${n}枚捨て`);}
+  // プレイヤー影響（コイン）
+  if(pw!==0&&!auditF){
+    const cnt=multi?G.cases.length:1;
+    G.coins=Math.max(0,G.coins+pw*cnt);
+    if(pw<0)addLog(`PL💰${signed(pw*cnt)}`,'danger');
   }
+  // ドロー
   if(pd>0){drawWorker(pd);addLog(`${pd}枚ドロー`,'good');}
   // ケース影響
   const filt=cs=>{
@@ -965,8 +1154,16 @@ function applyTrouble(card){
   });
   if(newC>0)for(let i=0;i<newC;i++)drawCase();
   updateSick();
-  if(G.mental<=0)G.phase='gameOver';
+  if(G.mental<=0){ G.phase='gameOver'; render(); if(cb)cb(); return; }
   render();
+
+  // 手札強制捨て（選択式）
+  if(ph>0&&G.hand.length>0){
+    const n=Math.min(ph,G.hand.length);
+    triggerDiscard(n, ()=>{ if(cb)cb(); });
+    return;
+  }
+  if(cb)cb();
 }
 
 // ─────────────────────────────────────────
@@ -980,6 +1177,8 @@ function checkCond(card,cs){
   const t=card['使用条件_ケース種別'];if(t&&cs.data['種別']!==t)return false;
   const fl=card['使用条件_フラグ'];
   if(fl==='不正'&&cs.illegalFlags<=0)return false;
+  if(fl==='収入あり'&&cs.data['収入フラグ']!=='収入あり')return false;
+  if(fl==='収入なし'&&cs.data['収入フラグ']==='収入あり')return false;
   if(nn(card['使用条件_ケース所持下限'])&&cs.curCoins<card['使用条件_ケース所持下限'])return false;
   if(nn(card['使用条件_ケース所持上限'])&&cs.curCoins>card['使用条件_ケース所持上限'])return false;
   if(nn(card['使用条件_ケースメンタル下限'])&&cs.curMental<card['使用条件_ケースメンタル下限'])return false;
@@ -994,32 +1193,47 @@ function getTargets(card){
     G.cases.forEach((cs,i)=>{if(checkCond(card,cs))tgts.push({type:'case',idx:i,label:cs.data['カード名'],cs});});
     return tgts;
   }
-  if(range==='担当ケース全員'||range==='ケース全員'){tgts.push({type:'all',label:'全担当ケース'});return tgts;}
+  if(range==='担当ケース全員'||range==='ケース全員'){
+    // 条件を満たすケースが1件以上あれば全員対象として有効
+    const hasValid=G.cases.some(cs=>checkCond(card,cs));
+    if(hasValid)tgts.push({type:'all',label:'全担当ケース（条件合致のみ）'});
+    return tgts;
+  }
   return tgts;
 }
 function hasAnyTarget(card){return getTargets(card).length>0;}
 
 function onClickWorker(hi){
-  if(G.phase!=='action'||G.actLeft<=0)return;
+  if(G.phase!=='action')return;
   const card=G.hand[hi];
-  if(!canAfford(card)){addLog('💰が足りません','danger');return;}
-  const tgts=getTargets(card);
-  if(!tgts.length){addLog('使用条件を満たすケースがありません','danger');return;}
-  G.selCard=hi;G._targets=tgts;
+  const noAct=G.actLeft<=0;
+  const affordable=!noAct&&canAfford(card);
+  const tgts=affordable?getTargets(card):[];
+  const canUse=!noAct&&affordable&&tgts.length>0;
 
-  // モーダル表示
+  G.selCard=canUse?hi:null;
+  G._targets=tgts;
+
   document.getElementById('mc-title').textContent=card['カード名'];
-  document.getElementById('mc-detail').textContent=card['効果詳細テキスト']||'（効果詳細なし）';
+  let detailText=card['効果詳細テキスト']||'（効果詳細なし）';
+  if(noAct)          detailText='残り行動数が0です。\n\n'+detailText;
+  else if(!affordable)detailText='💰が不足しています。\n\n'+detailText;
+  else if(!tgts.length)detailText='使用条件を満たすケースがありません。\n\n'+detailText;
+  document.getElementById('mc-detail').textContent=detailText;
 
   const tDiv=document.getElementById('mc-targets');
   const btnDiv=document.getElementById('mc-btns');
 
-  if(tgts.length===1&&(tgts[0].type==='player'||tgts[0].type==='all')){
+  if(!canUse){
     tDiv.innerHTML='';
-    btnDiv.innerHTML=`<button class="mbtn mbtn-use" onclick="doUse(${hi},0)">使用する</button><button class="mbtn mbtn-cancel" onclick="closeModal('modal-card');cancelSelect()">やめる</button>`;
+    btnDiv.innerHTML=`<button class="mbtn mbtn-cancel" onclick="closeModal('modal-card');cancelSelect()">閉じる</button>`;
+  } else if(tgts.length===1&&(tgts[0].type==='player'||tgts[0].type==='all')){
+    tDiv.innerHTML='';
+    btnDiv.innerHTML=`<button class="mbtn mbtn-use" onclick="doUse(${hi},0)">使用する</button>`
+                   +`<button class="mbtn mbtn-cancel" onclick="closeModal('modal-card');cancelSelect()">やめる</button>`;
   } else {
-    tDiv.innerHTML='<div style="font-size:.7rem;color:#666;margin-bottom:6px;">対象を選択</div><div class="target-list">'+
-      tgts.map((t,ti)=>`<div class="target-item" onclick="doUse(${hi},${ti})">
+    tDiv.innerHTML='<div style="font-size:.7rem;color:#666;margin-bottom:6px;">対象を選択</div><div class="target-list">'
+      +tgts.map((t,ti)=>`<div class="target-item" onclick="doUse(${hi},${ti})">
         <span class="ti-name">${t.label}</span>
         <span class="ti-stats">${t.cs?`💰${t.cs.curCoins} 🧠${t.cs.curMental}`:''}</span>
       </div>`).join('')+'</div>';
@@ -1037,19 +1251,33 @@ function doUse(hi,ti){
   G.coins=Math.max(0,G.coins+pw);G.mental=Math.max(0,G.mental+pm);
   // 効果
   if(tgt.type==='player')applyPL(card);
-  else if(tgt.type==='all')G.cases.forEach((_,i)=>applyCase(card,i));
+  else if(tgt.type==='all')G.cases.forEach((_,i)=>{if(checkCond(card,G.cases[i]))applyCase(card,i);});
   else applyCase(card,tgt.idx);
-  // ドロー・ガード
-  if(card['ドロー数'])drawWorker(card['ドロー数']);
+  // ガード
   if(card['プレイヤーガードフラグ'])G.guardFlag=true;
-  const disc=card['捨て札数']||0;
-  // 消費
+  // カード消費
   G.wDiscard.push(G.hand.splice(hi,1)[0]);
   G.actLeft--;G.selCard=null;
   addLog(`「${card['カード名']}」使用（残行動${G.actLeft}）`,'good');
-  if(disc>0&&G.hand.length>0){triggerDiscard(disc);return;}
-  checkHandLimit();
   if(G.mental<=0){gameOver('メンタル崩壊');return;}
+
+  const discN=card['捨て札数']||0;
+  const drawN=card['ドロー数']||0;
+
+  // ① まず捨て札処理
+  if(discN>0&&G.hand.length>0){
+    triggerDiscard(discN,()=>{
+      // ② 捨て後にドロー
+      if(drawN>0){drawWorker(drawN);}
+      // ③ ドロー後に上限チェック（超えてたら選んで捨て）
+      checkHandLimit();
+      render();
+    });
+    return;
+  }
+  // 捨て札なし：ドロー→上限チェック
+  if(drawN>0)drawWorker(drawN);
+  checkHandLimit();
   render();
 }
 function applyPL(card){
@@ -1084,13 +1312,37 @@ function checkHandLimit(){
 function triggerDiscard(n,cb){
   G.discReq=n;G.discCb=cb||null;G.discSel=[];
   document.getElementById('disc-title').textContent=`手札から${n}枚を捨ててください`;
-  document.getElementById('disc-grid').innerHTML=G.hand.map((c,i)=>`
-    <div class="discard-item" id="di-${i}" onclick="toggleDiscard(${i})">
-      <span>${c['カード名']}</span>
-      <span style="font-size:.63rem;color:#555;">${c['種別']} ${c['レアリティ']}</span>
-    </div>`).join('');
+  document.getElementById('disc-grid').innerHTML=G.hand.map((c,i)=>{
+    const pw=c['プレイヤー所持金変動'],pm=c['プレイヤーメンタル変動'];
+    const tw=c['ターゲット所持金変動'],tm=c['ターゲットメンタル変動'];
+    const costStr=[
+      pw!=null?`💰${pw>0?'+':''}${pw}`:'',
+      pm!=null?`🧠${pm>0?'+':''}${pm}`:'',
+      tw!=null?`→💰${tw>0?'+':''}${tw}`:'',
+      tm!=null?`→🧠${tm>0?'+':''}${tm}`:'',
+    ].filter(Boolean).join(' ');
+    return `<div class="discard-item" id="di-${i}">
+      <div onclick="toggleDiscard(${i})" style="flex:1;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-weight:700;">${c['カード名']}</span>
+        <span style="font-size:.6rem;color:#555;">${c['種別']} ${c['レアリティ']}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:3px;">
+        <span style="font-size:.58rem;color:#666;">${costStr}</span>
+        <button onclick="showDiscardDetail(${i})" style="font-size:.58rem;padding:1px 6px;border-radius:4px;border:1px solid #333;background:#1a1a1a;color:#888;cursor:pointer;">詳細</button>
+      </div>
+    </div>`;
+  }).join('');
   document.getElementById('disc-ok').disabled=true;
   openModal('modal-discard');
+}
+function showDiscardDetail(idx){
+  const c=G.hand[idx];
+  if(!c)return;
+  document.getElementById('mc-title').textContent=c['カード名'];
+  document.getElementById('mc-detail').textContent=c['効果詳細テキスト']||'（効果詳細なし）';
+  document.getElementById('mc-targets').innerHTML='';
+  document.getElementById('mc-btns').innerHTML=`<button class="mbtn mbtn-cancel" onclick="closeModal('modal-card')">閉じる</button>`;
+  openModal('modal-card');
 }
 function toggleDiscard(idx){
   const si=G.discSel.indexOf(idx);
@@ -1222,36 +1474,38 @@ function renderCases(){
     const el=document.createElement('div');
     el.className=`case-card${illGlow}${auditGlow}${tgted}`;
     el.innerHTML=`
-      <div class="cc-hdr">
-        <div class="cc-left">
-          <span class="cc-id">ID: ${d['ID']}</span>
-          <span class="cc-name">${d['カード名']}</span>
-          <div class="cc-sub">
-            <span class="bdg" style="background:${tSt};">${d['種別']}</span>
-            ${income}
-          </div>
-        </div>
-        <div class="cc-meta">
-          <div class="cc-meta-top">
-            <div class="pt-badge${isHard?' hard':''}">${d['獲得ポイント']||1}</div>
-            <span class="rar ${rarCls(d['レアリティ'])}">${d['レアリティ']}</span>
-          </div>
-        </div>
-      </div>
       <div class="cc-img"><div class="cc-img-grad"></div><span class="cc-noimg">NOIMAGE</span></div>
-      <div class="cc-markers">${mks.join('')}</div>
-      <div class="cc-body">
-        <div class="cc-stats-row">
-          <span class="cc-stat cs-coin">💰 ${cs.curCoins}</span>
-          <span class="cc-stat cs-mental">🧠 ${cs.curMental}</span>
-          ${cs.sickFlag>0?`<span class="cc-stat cs-sick">🦠 ${cs.sickFlag}</span>`:''}
+      <div class="cc-right">
+        <div class="cc-hdr">
+          <div class="cc-left">
+            <span class="cc-id">ID: ${d['ID']}</span>
+            <span class="cc-name">${d['カード名']}</span>
+            <div class="cc-sub">
+              <span class="bdg" style="background:${tSt};">${d['種別']}</span>
+              ${income}
+            </div>
+          </div>
+          <div class="cc-meta">
+            <div class="cc-meta-top">
+              <div class="pt-badge${isHard?' hard':''}">${d['獲得ポイント']||1}</div>
+              <span class="rar ${rarCls(d['レアリティ'])}">${d['レアリティ']}</span>
+            </div>
+          </div>
         </div>
-        <div class="cc-divider"></div>
-        <div class="cc-effects">
-          ${ttags.length?`<span style="font-size:.5rem;color:#555;margin-right:2px;">毎T</span>${ttags.join('')}`:''}
-          ${pltags.length?`<span style="font-size:.5rem;color:#555;margin-right:2px;margin-left:4px;">PL</span>${pltags.join('')}`:''}
+        <div class="cc-markers">${mks.join('')}</div>
+        <div class="cc-body">
+          <div class="cc-stats-row">
+            <span class="cc-stat cs-coin">💰 ${cs.curCoins}</span>
+            <span class="cc-stat cs-mental">🧠 ${cs.curMental}</span>
+            ${cs.sickFlag>0?`<span class="cc-stat cs-sick">🦠 ${cs.sickFlag}</span>`:''}
+          </div>
+          <div class="cc-divider"></div>
+          <div class="cc-effects">
+            ${ttags.length?`<span style="font-size:.48rem;color:#555;margin-right:2px;">毎T</span>${ttags.join('')}`:''}
+            ${pltags.length?`<span style="font-size:.48rem;color:#555;margin-right:2px;margin-left:4px;">PL</span>${pltags.join('')}`:''}
+          </div>
+          ${illParts.length?`<div style="margin-top:1px;"><span class="ill-cond">${illParts.join('　')}</span></div>`:''}
         </div>
-        ${illParts.length?`<div style="margin-top:2px;"><span class="ill-cond">${illParts.join('　')}</span></div>`:''}
       </div>`;
     // クリックイベント
     if(G.selCard!==null){
@@ -1313,6 +1567,13 @@ function renderHand(){
     if(card['ドロー数'])tags.push(`<span class="tag t-special">ドロー+${card['ドロー数']}</span>`);
     if(card['ターゲット種別変動'])tags.push(`<span class="tag t-special">→${card['ターゲット種別変動']}</span>`);
 
+    // 使用条件タグ
+    const condTags=[];
+    if(card['使用条件_ケース種別'])condTags.push(`<span class="tag t-cond" style="font-size:.48rem;">${card['使用条件_ケース種別']}</span>`);
+    if(card['使用条件_フラグ'])condTags.push(`<span class="tag t-cond" style="font-size:.48rem;">${card['使用条件_フラグ']}</span>`);
+    if(nn(card['使用条件_ケース所持下限']))condTags.push(`<span class="tag t-cond" style="font-size:.48rem;">💰≥${card['使用条件_ケース所持下限']}</span>`);
+    if(nn(card['使用条件_ケースメンタル下限']))condTags.push(`<span class="tag t-cond" style="font-size:.48rem;">🧠≥${card['使用条件_ケースメンタル下限']}</span>`);
+
     el.innerHTML=`
       <div class="wk-hdr">
         <div class="wk-left">
@@ -1327,14 +1588,16 @@ function renderHand(){
         </div>
       </div>
       <div class="wk-img"><div class="wk-img-grad"></div><span class="wk-noimg">NOIMAGE</span></div>
+      <div class="wk-div"></div>
       <div class="wk-body">
         <div class="wk-row">
-          <span class="tag t-target" style="font-size:.52rem;">${card['対象範囲']||'—'}</span>
-          ${card['使用条件_ケース種別']?`<span class="tag t-cond" style="font-size:.52rem;">${card['使用条件_ケース種別']}</span>`:''}
+          <span class="tag t-target" style="font-size:.48rem;">${card['対象範囲']||'—'}</span>
+          ${condTags.join('')}
         </div>
-        <div class="wk-row">${tags.join('')||'<span class="tag t-neutral" style="font-size:.52rem;">効果：詳細参照</span>'}</div>
+        <div class="wk-row">${tags.join('')||'<span class="tag t-neutral" style="font-size:.48rem;">詳細参照</span>'}</div>
       </div>`;
-    el.onclick=()=>{if(isAct&&G.actLeft>0)onClickWorker(i);};
+    // アクションフェーズ中は行動残数問わずタップでモーダルを開く（残0の場合は詳細確認のみ可）
+    el.onclick=()=>{ if(isAct) onClickWorker(i); };
     scroll.appendChild(el);
   });
   document.getElementById('hand-count').textContent=`${G.hand.length}/7`;

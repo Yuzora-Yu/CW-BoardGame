@@ -35,15 +35,31 @@
   .cards-grid{display:flex;flex-wrap:wrap;gap:14px;}
 
   /* ── カード共通 ── */
-  .card{width:198px;border-radius:13px;overflow:hidden;cursor:pointer;position:relative;transition:transform .18s ease,box-shadow .18s ease;user-select:none;flex-shrink:0;}
-  .card:hover{transform:translateY(-5px) scale(1.02);}
-  .card:active{transform:scale(.97);}
+  .card{width:220px;border-radius:13px;overflow:hidden;cursor:default;position:relative;transition:transform .18s ease,box-shadow .18s ease;user-select:none;flex-shrink:0;display:flex;flex-direction:column;}
+  .card:hover{transform:translateY(-4px) scale(1.01);}
   .card-worker{background:linear-gradient(160deg,var(--worker-bg1),var(--worker-bg2));border:2px solid var(--worker-border);box-shadow:0 6px 24px var(--worker-glow),0 0 0 1px rgba(76,175,80,.1);}
   .card-worker:hover{box-shadow:0 14px 40px rgba(45,106,45,.5),0 0 18px rgba(76,175,80,.2);}
   .card-trouble{background:linear-gradient(160deg,var(--trouble-bg1),var(--trouble-bg2));border:2px solid var(--trouble-border);box-shadow:0 6px 24px rgba(0,0,0,.55);}
   .card-trouble:hover{box-shadow:0 14px 40px rgba(0,0,0,.75),0 0 18px rgba(255,100,50,.16);border-color:#666;}
   .card-case{background:linear-gradient(160deg,var(--case-bg1),var(--case-bg2));border:2px solid var(--case-border);box-shadow:0 6px 24px var(--case-glow),0 0 0 1px rgba(229,57,53,.1);}
   .card-case:hover{box-shadow:0 14px 40px rgba(139,26,26,.5),0 0 18px rgba(229,57,53,.2);}
+
+  /* ── 詳細テキストエリア ── */
+  .card-detail{
+    margin:4px 8px 8px;
+    padding:7px 8px;
+    background:rgba(0,0,0,.25);
+    border-radius:6px;
+    font-size:.62rem;
+    line-height:1.65;
+    font-family:'Noto Serif JP',serif;
+    color:#888;
+    white-space:pre-wrap;
+    word-break:break-all;
+  }
+  .card-worker .card-detail{border-left:2px solid rgba(76,175,80,.25);}
+  .card-trouble .card-detail{border-left:2px solid rgba(255,100,50,.25);}
+  .card-case .card-detail{border-left:2px solid rgba(229,57,53,.25);}
 
   /* ── ヘッダー ── */
   .card-header{padding:9px 11px 7px;display:flex;align-items:flex-start;justify-content:space-between;gap:5px;}
@@ -274,7 +290,7 @@ function buildWorker(d){
   const condRow = conds.length ? `<div class="card-row"><span class="row-lbl">条件</span><div class="row-val">${conds.join('')}</div></div>` : '';
   const none = tag('t-neutral','— なし —');
 
-  return `<div class="card card-worker" onclick="openW('${esc(d['カード名'])}','${esc(d['効果詳細テキスト']||'')}')">
+  return `<div class="card card-worker">
     <div class="card-header">
       <div class="card-header-left">
         <span class="card-id">ID: ${d['ID']}</span>
@@ -295,8 +311,8 @@ function buildWorker(d){
       <div class="card-row"><span class="row-lbl">PL</span><div class="row-val">${pl.length?pl.join(''):none}</div></div>
       <div class="card-row"><span class="row-lbl">効果</span><div class="row-val">${ef.length?ef.join(''):none}</div></div>
       <div class="card-row"><span class="row-lbl">特殊</span><div class="row-val">${sp.length?sp.join(''):none}</div></div>
-      <p class="tap-hint">TAP FOR DETAIL</p>
     </div>
+    ${d['効果詳細テキスト']?`<div class="card-detail">${d['効果詳細テキスト'].replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`:''}
   </div>`;
 }
 
@@ -330,7 +346,7 @@ function buildTrouble(d){
   if(d['乗算フラグ']) tgt.push(tag('t-cond','×ケース数'));
 
   const none=tag('t-neutral','— なし —');
-  return `<div class="card card-trouble" onclick="openT('${esc(icon)}','${esc(d['カード名'])}','${esc(d['効果詳細テキスト']||'')}')">
+  return `<div class="card card-trouble">
     <div class="card-header">
       <div class="card-header-left">
         <span class="card-id">ID: ${d['ID']}</span>
@@ -350,6 +366,7 @@ function buildTrouble(d){
       <div class="card-row"><span class="row-lbl">ケース</span><div class="row-val">${cs.length?cs.join(''):none}</div></div>
       <div class="card-row"><span class="row-lbl">特殊</span><div class="row-val">${sp.length?sp.join(''):none}</div></div>
     </div>
+    ${d['効果詳細テキスト']?`<div class="card-detail">${d['効果詳細テキスト'].replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`:''}
   </div>`;
 }
 
@@ -377,7 +394,7 @@ function buildCase(d){
   if(d['ターンエンド_不正フラグ加算条件_メンタル']!=null) ill.push(`🧠≦${d['ターンエンド_不正フラグ加算条件_メンタル']}`);
 
   const none=tag('t-neutral','— なし —');
-  return `<div class="card card-case" onclick="openC('${esc(d['カード名'])}','${esc(d['効果詳細テキスト']||'')}')">
+  return `<div class="card card-case">
     <div class="card-header">
       <div class="card-header-left">
         <span class="card-id">ID: ${d['ID']}</span>
@@ -419,8 +436,8 @@ function buildCase(d){
         <span class="row-lbl">不正条件</span>
         <div class="row-val"><span class="ill-cond">${ill.length?ill.join('　'):'なし'}</span></div>
       </div>
-      <p class="tap-hint">TAP FOR DETAIL</p>
     </div>
+    ${d['効果詳細テキスト']?`<div class="card-detail">${d['効果詳細テキスト'].replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`:''}
   </div>`;
 }
 

@@ -89,25 +89,25 @@ tr:nth-child(even) td{background:rgba(255,255,255,.02);}
 
 <h3>2ターン目以降</h3>
 <div class="flow">
-  <div class="flow-step"><div class="flow-num">1</div><div>💰+3 / 🧠+1 で回復（病気中は💰+1 / 🧠+0）</div></div>
+  <div class="flow-step"><div class="flow-num">1</div><div>💰+3 で回復（病気中は💰+1）※メンタル自動回復なし</div></div>
   <div class="flow-step"><div class="flow-num">2</div><div>ケースのターン変動処理（毎T欄の数値を自動適用）</div></div>
-  <div class="flow-step"><div class="flow-num">3</div><div>トラブルカード1枚発動</div></div>
-  <div class="flow-step"><div class="flow-num">4</div><div>ケース追加（通常：奇数ターンのみ / ハード：毎ターン）</div></div>
-  <div class="flow-step"><div class="flow-num">5</div><div>アクションフェーズ（1枚ドロー → 行動）</div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div>トラブルカード1枚発動（手札捨てが必要な場合は選択式）</div></div>
+  <div class="flow-step"><div class="flow-num">4</div><div>ケース追加（通常：3T目から奇数Tのみ / ハード：毎ターン）</div></div>
+  <div class="flow-step"><div class="flow-num">5</div><div>アクションフェーズ（2枚ドロー → 行動）</div></div>
   <div class="flow-step"><div class="flow-num">6</div><div>ターンエンド処理（①〜⑦）</div></div>
 </div>
 
 <h2>⚡ アクションフェーズ</h2>
-<p><strong style="color:#a5d6a7;">行動回数 = 担当ケース数 − 1</strong></p>
+<p><strong style="color:#a5d6a7;">行動回数 = 担当ケース数 + 1</strong>（毎ターン開始時に2枚ドロー）</p>
 <table>
   <tr><th>行動</th><th>内容</th></tr>
-  <tr><td>A カードを使う</td><td>担当ケースまたは自分/他ワーカーに使用</td></tr>
+  <tr><td>A カードを使う</td><td>担当ケースまたは自分/他ワーカーに使用（使用条件は各カード参照）</td></tr>
   <tr><td>C 交換</td><td>隣のワーカーと1枚ずつ交換（合意必要・行動1消費）</td></tr>
   <tr><td>D 追加ドロー</td><td>💰-1 ＋ 行動1消費でワーカー山札から1枚引く</td></tr>
 </table>
 <ul>
-  <li>💰が足りない場合、コストのかかる行動・カードは使用不可</li>
   <li>手札は7枚上限。超えたら自分で選んで捨てる</li>
+  <li>カードには使用条件あり（種別・収入フラグ・所持金・メンタル等）。条件不足のカードは使用不可</li>
 </ul>
 
 <h2>📋 ターンエンド処理（順番厳守）</h2>
@@ -115,7 +115,7 @@ tr:nth-child(even) td{background:rgba(255,255,255,.02);}
   <div class="flow-step"><div class="flow-num">①</div><div>不正フラグ加算：各ケースが条件を満たせば不正フラグ+1（AND条件）</div></div>
   <div class="flow-step"><div class="flow-num">②</div><div>不正フラグ分だけCWの💰を減算</div></div>
   <div class="flow-step"><div class="flow-num">③</div><div>怒りフラグ3累積のケース → 対応困難ケース（ID1019）に変化</div></div>
-  <div class="flow-step"><div class="flow-num">④</div><div>💰5到達・自立フラグ付きケース → 自立廃止・ポイント取得</div></div>
+  <div class="flow-step"><div class="flow-num">④</div><div>自立判定：💰5到達 or 自立フラグ → 自立廃止・ポイント取得<br><span style="color:#ff8a65;font-size:.78rem;">※困難ケースは専用カード（自立フラグ）使用時のみ自立可。💰5到達では自立しない</span></div></div>
   <div class="flow-step"><div class="flow-num">⑤</div><div>監査判定：監査フラグ保持中に不正ケースが残っていれば → ゲームオーバー</div></div>
   <div class="flow-step"><div class="flow-num">⑥</div><div>🧠0のケース → 精神ケース（ID1004）に変化</div></div>
   <div class="flow-step"><div class="flow-num">⑦</div><div>ルーレット（5パターン均等20%）</div></div>
@@ -124,8 +124,8 @@ tr:nth-child(even) td{background:rgba(255,255,255,.02);}
 <h2>⭐ ポイントと勝利条件</h2>
 <table>
   <tr><th>イベント</th><th>ポイント</th></tr>
-  <tr><td>ケース自立（💰5到達・自立フラグ）</td><td>+1pt</td></tr>
-  <tr><td>困難ケース（ID1019）の自立</td><td>+2pt</td></tr>
+  <tr><td>ケース自立（💰5到達 or 自立フラグ）</td><td>+1pt</td></tr>
+  <tr><td>困難ケース（ID1019）の自立 ※専用カード必須</td><td>+2pt</td></tr>
   <tr><td>ケースの死亡</td><td>-1pt ＋ CW🧠-1</td></tr>
   <tr><td>ケースの失踪</td><td>CW💰-1（ポイント変動なし）</td></tr>
 </table>
@@ -170,7 +170,7 @@ tr:nth-child(even) td{background:rgba(255,255,255,.02);}
 
 <h2>🦠 病気システム</h2>
 <p>担当ケースの病気フラグ合計が<strong style="color:#aed581;">2以上</strong>になると担当CWが<strong style="color:#aed581;">病気状態</strong>に。</p>
-<p>病気中のターン開始回復は <strong>💰+1 / 🧠+0</strong>（通常は💰+3 / 🧠+1）</p>
+<p>病気中のターン開始回復は <strong>💰+1のみ</strong>（通常は💰+3）</p>
 
 <h2>🔚 ゲーム終了条件</h2>
 <ul>
